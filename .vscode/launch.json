@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Electron: Main",
+      "request": "launch",
+      "type": "node",
+      "port": 5858,
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "start"
+      ]
+    },
+    {
+      "name": "Electron: Renderer",
+      "request": "attach",
+      "type": "chrome",
+      "port": 9223,
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/renderer/src",
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/*"
+      }
+    },
+    {
+      "name": "Chrome",
+      "request": "launch",
+      "type": "chrome",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/renderer/src",
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/*"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Electron: All",
+      "configurations": [
+        "Electron: Main",
+        "Electron: Renderer"
+      ]
+    }
+  ]
+}

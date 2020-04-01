@@ -8,7 +8,7 @@
     "electron": "^8.2.0"
   },
   "scripts": {
-    "electron": "electron src",
+    "electron": "electron --inspect=5858 --remote-debugging-port=9223 src",
     "start": "set NODE_ENV=dev && nodemon --watch ./src --watch . --exec \"yarn electron\""
   },
   "dependencies": {
