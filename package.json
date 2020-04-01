@@ -1,0 +1,13 @@
+{
+  "name": "electron-create-react-app-test",
+  "version": "0.1.0",
+  "main": "index.js",
+  "author": "Damien ARTIGNAN",
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^5.1.0"
+  },
+  "scripts": {
+    "start": "concurrently \"cd renderer && yarn start\" \"cd main && yarn start\""
+  }
+}

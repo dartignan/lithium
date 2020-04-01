@@ -1,0 +1,17 @@
+{
+  "name": "main",
+  "version": "0.1.0",
+  "main": ".src/index.js",
+  "author": "Damien ARTIGNAN",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^8.2.0"
+  },
+  "scripts": {
+    "electron": "electron src",
+    "start": "set NODE_ENV=dev && nodemon --watch ./src --watch . --exec \"yarn electron\""
+  },
+  "dependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
