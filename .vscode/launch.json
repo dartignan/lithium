@@ -8,9 +8,7 @@
       "port": 5858,
       "cwd": "${workspaceRoot}/main/dist",
       "runtimeExecutable": "yarn",
-      "runtimeArgs": [
-        "start"
-      ],
+      "runtimeArgs": ["start"],
       "timeout": 30000
     },
     {
@@ -40,10 +38,7 @@
   "compounds": [
     {
       "name": "Electron: All",
-      "configurations": [
-        "Electron: Main",
-        "Electron: Renderer"
-      ]
+      "configurations": ["Electron: Main", "Electron: Renderer"]
     }
   ]
 }
