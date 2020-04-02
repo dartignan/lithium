@@ -5,9 +5,23 @@
   "author": "Damien ARTIGNAN",
   "license": "MIT",
   "dependencies": {
-    "concurrently": "^5.1.0"
+    "concurrently": "^5.1.0",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.1.1",
+    "prettier": "^2.0.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
   },
   "scripts": {
+    "format": "prettier --write **/*.{js,jsx,ts,tsx,json,css,scss,md}",
     "start": "concurrently \"cd renderer && yarn start\" \"cd main && yarn start\""
   }
 }
