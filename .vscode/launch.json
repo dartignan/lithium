@@ -8,7 +8,8 @@
       "port": 5858,
       "cwd": "${workspaceRoot}/main/dist",
       "runtimeExecutable": "yarn",
-      "runtimeArgs": ["start"],
+      "runtimeArgs": ["--cwd", "main", "start"],
+      "preLaunchTask": "renderer-start-and-wait-ready",
       "timeout": 30000
     },
     {

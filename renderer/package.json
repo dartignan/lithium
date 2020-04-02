@@ -16,13 +16,15 @@
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "typeface-roboto": "^0.0.75",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "wait-on": "^4.0.1"
   },
   "scripts": {
     "start": "set NODE_PATH=./src && react-scripts start",
     "build": "set NODE_PATH=./src && react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "wait-ready": "wait-on http://localhost:3000"
   },
   "eslintConfig": {
     "extends": "react-app"
