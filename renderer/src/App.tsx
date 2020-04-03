@@ -3,28 +3,33 @@ import "./App.css";
 
 import "typeface-roboto";
 import { createMuiTheme } from "@material-ui/core/styles";
-import deepPurple from "@material-ui/core/colors/deepPurple";
 import { ThemeProvider } from "@material-ui/core/styles";
 
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import MinimizeIcon from "@material-ui/icons/Minimize";
+import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
+import CloseIcon from "@material-ui/icons/Close";
 
 import Drawer from "@material-ui/core/Drawer";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
+import ExtensionIcon from "@material-ui/icons/Extension";
 
 import Slider from "@material-ui/core/Slider";
 
-import { createStyles, Theme, makeStyles } from "@material-ui/core/styles";
+import {
+  Theme,
+  createStyles,
+  makeStyles,
+  withStyles
+} from "@material-ui/core/styles";
 
 const leftDrawerWidth = 250;
 const rightDrawerWidth = 50;
@@ -32,7 +37,8 @@ const rightDrawerWidth = 50;
 const darkTheme = createMuiTheme({
   palette: {
     type: "dark",
-    primary: deepPurple
+    primary: { main: "#564b7e" },
+    secondary: { main: "#786fb3" }
   }
 });
 
@@ -47,6 +53,9 @@ const useStyles = makeStyles((theme: Theme) =>
     appBar: {
       zIndex: theme.zIndex.drawer + 1
     },
+    title: {
+      flexGrow: 1,
+    },
     leftDrawer: {
       width: leftDrawerWidth,
       flexShrink: 0
@@ -59,7 +68,20 @@ const useStyles = makeStyles((theme: Theme) =>
       flexShrink: 0
     },
     rightDrawerPaper: {
-      width: rightDrawerWidth
+      width: rightDrawerWidth,
+      alignItems: "center"
+    },
+    slider: {
+      margin: "15px",
+      color: "#8d85bf"
+    },
+    sliderTrack: {
+      height: 8,
+      borderRadius: 4
+    },
+    sliderRail: {
+      height: 8,
+      borderRadius: 4
     },
     content: {
       flexGrow: 1,
@@ -70,6 +92,32 @@ const useStyles = makeStyles((theme: Theme) =>
     toolbar: theme.mixins.toolbar
   })
 );
+
+// Attempt to customize slider
+const CustomSlider = withStyles({
+  root: {
+    color: "#8d85bf",
+    margin: 10
+  },
+  thumb: {
+    height: 16,
+    width: 16
+  },
+  track: {
+    height: 8,
+    borderRadius: 4,
+    $vertical: {
+      width: 8
+    }
+  },
+  rail: {
+    height: 8,
+    borderRadius: 4,
+    "$vertical $rail": {
+      width: 8
+    }
+  }
+})(Slider);
 
 function App() {
   const classes = useStyles();
@@ -91,11 +139,20 @@ function App() {
               color="inherit"
               aria-label="menu"
             >
-              <MenuIcon />
+              <GetAppIcon />
             </IconButton>
-            <Typography variant="h6" color="inherit">
-              Photos
+            <Typography variant="h6" className={classes.title} color="inherit">
+              Lithium
             </Typography>
+            <IconButton aria-label="minimize" color="inherit">
+              <MinimizeIcon />
+            </IconButton>
+            <IconButton aria-label="exit full screen" color="inherit">
+              <FullscreenExitIcon />
+            </IconButton>
+            <IconButton aria-label="close" edge="end" color="inherit">
+              <CloseIcon />
+            </IconButton>
           </Toolbar>
         </AppBar>
         <Drawer
@@ -107,21 +164,10 @@ function App() {
         >
           <div className={classes.toolbar} />
           <List>
-            {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
+            {["Part 1", "Part 2", "Part 3", "Part 4"].map((text, index) => (
               <ListItem button key={text}>
                 <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            ))}
-          </List>
-          <Divider />
-          <List>
-            {["All mail", "Trash", "Spam"].map((text, index) => (
-              <ListItem button key={text}>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  <ExtensionIcon />
                 </ListItemIcon>
                 <ListItemText primary={text} />
               </ListItem>
@@ -129,7 +175,7 @@ function App() {
           </List>
         </Drawer>
         <main className={classes.content}>
-        <div className={classes.toolbar} />
+          <div className={classes.toolbar} />
           <Typography paragraph>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
@@ -171,6 +217,7 @@ function App() {
         >
           <div className={classes.toolbar} />
           <Slider
+            className={classes.slider}
             orientation="vertical"
             value={value}
             onChange={handleChange}
