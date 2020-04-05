@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 
 import "typeface-roboto";
@@ -32,6 +32,20 @@ import {
   makeStyles,
   withStyles
 } from "@material-ui/core/styles";
+import { Object3D } from "three";
+
+// import {IpcRenderer} from 'electron';
+
+// declare global {
+//   interface Window {
+//     require: (module: 'electron') => {
+//       ipcRenderer: IpcRenderer
+//     };
+//   }
+// }
+
+const { ipcRenderer } = eval("require('electron')");
+// window.require('electron');
 
 const leftDrawerWidth = 250;
 const rightDrawerWidth = 50;
@@ -87,8 +101,8 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: 4
     },
     content: {
-      width: '100%',
-      height: '100%'
+      width: "100%",
+      height: "100%"
     },
 
     // Necessary for content to be below AppBar
@@ -122,6 +136,13 @@ const CustomSlider = withStyles({
   }
 })(Slider);
 
+class Item {
+  name: string = "Item";
+  object: Object3D = new Object3D();
+}
+
+var itemList:Item[]=[];
+
 function App() {
   const classes = useStyles();
   const [value, setValue] = React.useState<number>(30);
@@ -130,6 +151,17 @@ function App() {
     setValue(newValue as number);
   };
 
+  useEffect(() => {
+    //File selected
+    ipcRenderer.on("item:add", function (
+      e: any,
+      objectName: string,
+      object: Object3D
+    ) {
+      addItem(objectName, object);
+    });
+  }, []);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <div className={classes.root}>
@@ -137,10 +169,11 @@ function App() {
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
             <IconButton
+              onClick={loadFile}
               edge="start"
               className={classes.menuButton}
               color="inherit"
-              aria-label="menu"
+              aria-label="import"
             >
               <GetAppIcon />
             </IconButton>
@@ -167,12 +200,12 @@ function App() {
         >
           <div className={classes.toolbar} />
           <List>
-            {["Part 1", "Part 2", "Part 3", "Part 4"].map((text, index) => (
-              <ListItem button key={text}>
+            {itemList.map(item => (
+              <ListItem button key={item.name}>
                 <ListItemIcon>
                   <ExtensionIcon />
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={item.name} />
               </ListItem>
             ))}
           </List>
@@ -202,5 +235,11 @@ function App() {
     </ThemeProvider>
   );
 }
+
+function loadFile() {
+  ipcRenderer.send("file:open");
+}
+
+function addItem(objectName: string, object: THREE.Object3D) {}
 
 export default App;

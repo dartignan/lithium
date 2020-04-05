@@ -2,7 +2,7 @@ import * as THREE from "three";
 import React, { useCallback, useRef, useMemo, useState } from "react";
 import { Canvas, useFrame } from "react-three-fiber";
 
-function Swarm({ count, mouse }) {
+function Swarm( count, mouse ) {
   const mesh = useRef();
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
@@ -72,7 +72,7 @@ function Box(props) {
   useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01));
 
   return (
-    <mesh
+    <mesh 
       {...props}
       ref={mesh}
       scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}

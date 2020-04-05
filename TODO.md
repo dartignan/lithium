@@ -1,0 +1,3 @@
+- Close, Minimize, Maximize/Restore
+- Debug main
+- Sécurité ipcRenderer => https://github.com/electron/electron/issues/9920
