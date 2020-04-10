@@ -1,3 +1,7 @@
 - Close, Minimize, Maximize/Restore
-- Debug main
+- Import STL
+- Import 3MF
+- List sync
+- Clipping
 - Sécurité ipcRenderer => https://github.com/electron/electron/issues/9920
+- Pattern immutable, opérateur ...
