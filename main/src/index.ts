@@ -41,6 +41,18 @@ app.on("activate", () => {
   }
 });
 
+ipcMain.on("window:minimize", function (e) {
+  win.minimize();
+});
+
+ipcMain.on("window:maximize", function (e) {
+  win.maximize();
+});
+
+ipcMain.on("window:close", function (e) {
+  win.close();
+});
+
 // Catch file:open
 ipcMain.on("file:open", function (e) {
   const selectedPaths = dialog.showOpenDialogSync({

@@ -11,7 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import MinimizeIcon from "@material-ui/icons/Minimize";
-import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
+import FullscreenIcon from "@material-ui/icons/Fullscreen";
 import CloseIcon from "@material-ui/icons/Close";
 
 import Drawer from "@material-ui/core/Drawer";
@@ -180,13 +180,13 @@ function App() {
             <Typography variant="h6" className={classes.title} color="inherit">
               Lithium
             </Typography>
-            <IconButton aria-label="minimize" color="inherit">
+            <IconButton onClick={minimizeWindow} aria-label="minimize" color="inherit">
               <MinimizeIcon />
             </IconButton>
-            <IconButton aria-label="exit full screen" color="inherit">
-              <FullscreenExitIcon />
+            <IconButton onClick={maximizeWindow} aria-label="full screen" color="inherit">
+              <FullscreenIcon />
             </IconButton>
-            <IconButton aria-label="close" edge="end" color="inherit">
+            <IconButton onClick={closeWindow} aria-label="close" edge="end" color="inherit">
               <CloseIcon />
             </IconButton>
           </Toolbar>
@@ -234,6 +234,18 @@ function App() {
       </div>
     </ThemeProvider>
   );
+}
+
+function minimizeWindow() {
+  ipcRenderer.send("window:minimize");
+}
+
+function maximizeWindow() {
+  ipcRenderer.send("window:maximize");
+}
+
+function closeWindow() {
+  ipcRenderer.send("window:close");
 }
 
 function loadFile() {
