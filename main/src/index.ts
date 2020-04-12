@@ -1,5 +1,4 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
-import * as THREE from "three";
 // import { ThreeMFLoader } from './3MFLoader';
 import { STLLoader } from "./STLLoader";
 
@@ -14,8 +13,8 @@ function createWindow() {
     webPreferences: {
       // <--- (1) Additional preferences
       nodeIntegration: true,
-      preload: __dirname + "/preload.js" // <--- (2) Preload script
-    }
+      preload: __dirname + "/preload.js", // <--- (2) Preload script
+    },
   });
 
   win.loadURL("http://localhost:3000"); // <--- (3) Loading react
@@ -59,9 +58,9 @@ ipcMain.on("file:open", function (e) {
     filters: [
       { name: "3D Files", extensions: ["3mf", "stl"] },
       { name: "3MF Files", extensions: ["3mf"] },
-      { name: "STL Files", extensions: ["stl"] }
+      { name: "STL Files", extensions: ["stl"] },
     ],
-    properties: ["openFile", "multiSelections"]
+    properties: ["openFile", "multiSelections"],
   });
 
   if (selectedPaths) {
@@ -70,7 +69,7 @@ ipcMain.on("file:open", function (e) {
 });
 
 function handleFileSelection(filePaths: string[]) {
-  filePaths.forEach(filePath => {
+  filePaths.forEach((filePath) => {
     var fileExtension = filePath.split(".").pop();
 
     // if (fileExtension === '3mf') {
@@ -80,7 +79,6 @@ function handleFileSelection(filePaths: string[]) {
 
     //  win.webContents.send("item:add", filePath, mesh);
 
-
     //     });
 
     // }
@@ -88,13 +86,7 @@ function handleFileSelection(filePaths: string[]) {
     if (fileExtension === "stl") {
       var stlLoader = new STLLoader();
       stlLoader.load(filePath, function (geometry) {
-        var material = new THREE.MeshPhongMaterial({
-          color: 0xe0e0e0,
-          flatShading: true
-        });
-        var mesh = new THREE.Mesh(geometry, material);
-
-        win.webContents.send("item:add", filePath, mesh);
+        win.webContents.send("item:add", filePath, geometry);
       });
     }
   });

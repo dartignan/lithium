@@ -30,22 +30,14 @@ import {
   Theme,
   createStyles,
   makeStyles,
-  withStyles
+  withStyles,
 } from "@material-ui/core/styles";
-import { Object3D } from "three";
 
-// import {IpcRenderer} from 'electron';
+import { Float32BufferAttribute } from "three";
+import { BufferGeometry } from "three";
 
-// declare global {
-//   interface Window {
-//     require: (module: 'electron') => {
-//       ipcRenderer: IpcRenderer
-//     };
-//   }
-// }
 
 const { ipcRenderer } = eval("require('electron')");
-// window.require('electron');
 
 const leftDrawerWidth = 250;
 const rightDrawerWidth = 50;
@@ -54,59 +46,59 @@ const darkTheme = createMuiTheme({
   palette: {
     type: "dark",
     primary: { main: "#564b7e" },
-    secondary: { main: "#786fb3" }
-  }
+    secondary: { main: "#786fb3" },
+  },
 });
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       height: "100%",
-      display: "flex"
+      display: "flex",
     },
     menuButton: {
-      marginRight: theme.spacing(2)
+      marginRight: theme.spacing(2),
     },
     appBar: {
-      zIndex: theme.zIndex.drawer + 1
+      zIndex: theme.zIndex.drawer + 1,
     },
     title: {
-      flexGrow: 1
+      flexGrow: 1,
     },
     leftDrawer: {
       width: leftDrawerWidth,
-      flexShrink: 0
+      flexShrink: 0,
     },
     leftDrawerPaper: {
-      width: leftDrawerWidth
+      width: leftDrawerWidth,
     },
     rightDrawer: {
       width: rightDrawerWidth,
-      flexShrink: 0
+      flexShrink: 0,
     },
     rightDrawerPaper: {
       width: rightDrawerWidth,
-      alignItems: "center"
+      alignItems: "center",
     },
     slider: {
       margin: "15px",
-      color: "#8d85bf"
+      color: "#8d85bf",
     },
     sliderTrack: {
       height: 8,
-      borderRadius: 4
+      borderRadius: 4,
     },
     sliderRail: {
       height: 8,
-      borderRadius: 4
+      borderRadius: 4,
     },
     content: {
       width: "100%",
-      height: "100%"
+      height: "100%",
     },
 
     // Necessary for content to be below AppBar
-    toolbar: theme.mixins.toolbar
+    toolbar: theme.mixins.toolbar,
   })
 );
 
@@ -114,38 +106,44 @@ const useStyles = makeStyles((theme: Theme) =>
 const CustomSlider = withStyles({
   root: {
     color: "#8d85bf",
-    margin: 10
+    margin: 10,
   },
   thumb: {
     height: 16,
-    width: 16
+    width: 16,
   },
   track: {
     height: 8,
     borderRadius: 4,
     $vertical: {
-      width: 8
-    }
+      width: 8,
+    },
   },
   rail: {
     height: 8,
     borderRadius: 4,
     "$vertical $rail": {
-      width: 8
-    }
-  }
+      width: 8,
+    },
+  },
 })(Slider);
 
 class Item {
-  name: string = "Item";
-  object: Object3D = new Object3D();
-}
+  id: string;
+  name: string;
+  geometryData: {vertexArray: Float32Array, normalArray: Float32Array};
 
-var itemList:Item[]=[];
+  constructor(id: string, name: string, geometryData: {vertexArray: Float32Array, normalArray: Float32Array}) {
+    this.id = id;
+    this.name = name;
+    this.geometryData = geometryData;
+  }
+}
 
 function App() {
   const classes = useStyles();
   const [value, setValue] = React.useState<number>(30);
+  const [items, setItems] = React.useState<Item[]>([]);
 
   const handleChange = (event: any, newValue: number | number[]) => {
     setValue(newValue as number);
@@ -156,9 +154,14 @@ function App() {
     ipcRenderer.on("item:add", function (
       e: any,
       objectName: string,
-      object: Object3D
+      geometryData : {vertexArray: Float32Array, normalArray: Float32Array}
     ) {
-      addItem(objectName, object);
+      var geometry = new BufferGeometry();
+
+      geometry.setAttribute("position", new Float32BufferAttribute(geometryData.vertexArray, 3));
+      geometry.setAttribute("normal", new Float32BufferAttribute(geometryData.normalArray, 3));
+
+      setItems(items => [...items, new Item(geometry.uuid, objectName, geometryData)]);
     });
   }, []);
 
@@ -180,13 +183,26 @@ function App() {
             <Typography variant="h6" className={classes.title} color="inherit">
               Lithium
             </Typography>
-            <IconButton onClick={minimizeWindow} aria-label="minimize" color="inherit">
+            <IconButton
+              onClick={minimizeWindow}
+              aria-label="minimize"
+              color="inherit"
+            >
               <MinimizeIcon />
             </IconButton>
-            <IconButton onClick={maximizeWindow} aria-label="full screen" color="inherit">
+            <IconButton
+              onClick={maximizeWindow}
+              aria-label="full screen"
+              color="inherit"
+            >
               <FullscreenIcon />
             </IconButton>
-            <IconButton onClick={closeWindow} aria-label="close" edge="end" color="inherit">
+            <IconButton
+              onClick={closeWindow}
+              aria-label="close"
+              edge="end"
+              color="inherit"
+            >
               <CloseIcon />
             </IconButton>
           </Toolbar>
@@ -195,12 +211,12 @@ function App() {
           className={classes.leftDrawer}
           variant="permanent"
           classes={{
-            paper: classes.leftDrawerPaper
+            paper: classes.leftDrawerPaper,
           }}
         >
           <div className={classes.toolbar} />
           <List>
-            {itemList.map(item => (
+            {items.map((item) => (
               <ListItem button key={item.name}>
                 <ListItemIcon>
                   <ExtensionIcon />
@@ -212,13 +228,13 @@ function App() {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <ThreeScene />
+          <ThreeScene items={items} />
         </main>
         <Drawer
           className={classes.rightDrawer}
           variant="permanent"
           classes={{
-            paper: classes.rightDrawerPaper
+            paper: classes.rightDrawerPaper,
           }}
           anchor="right"
         >
@@ -251,7 +267,5 @@ function closeWindow() {
 function loadFile() {
   ipcRenderer.send("file:open");
 }
-
-function addItem(objectName: string, object: THREE.Object3D) {}
 
 export default App;

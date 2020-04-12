@@ -68,7 +68,7 @@ const fs = require("fs");
 class STLLoader {
   constructor() {}
 
-  load(url: string, onLoad: (response: BufferGeometry) => void) {
+  load(url: string, onLoad: (response: {vertexArray: Float32Array, normalArray: Float32Array}) => void) {
     fs.readFile(url, (err, data) => {
       if (err) throw err;
       var arrayBufferData = data.buffer.slice(
@@ -148,8 +148,8 @@ function parseBinary(data: ArrayBuffer) {
 
   var geometry = new BufferGeometry();
 
-  var vertices = new Float32Array(faces * 3 * 3);
-  var normals = new Float32Array(faces * 3 * 3);
+  var vertexArray = new Float32Array(faces * 3 * 3);
+  var normalArray = new Float32Array(faces * 3 * 3);
   var colors = new Float32Array(faces * 3 * 3);
 
   // process STL header
@@ -196,13 +196,13 @@ function parseBinary(data: ArrayBuffer) {
       var vertexstart = start + i * 12;
       var componentIdx = face * 3 * 3 + (i - 1) * 3;
 
-      vertices[componentIdx] = reader.getFloat32(vertexstart, true);
-      vertices[componentIdx + 1] = reader.getFloat32(vertexstart + 4, true);
-      vertices[componentIdx + 2] = reader.getFloat32(vertexstart + 8, true);
+      vertexArray[componentIdx] = reader.getFloat32(vertexstart, true);
+      vertexArray[componentIdx + 1] = reader.getFloat32(vertexstart + 4, true);
+      vertexArray[componentIdx + 2] = reader.getFloat32(vertexstart + 8, true);
 
-      normals[componentIdx] = normalX;
-      normals[componentIdx + 1] = normalY;
-      normals[componentIdx + 2] = normalZ;
+      normalArray[componentIdx] = normalX;
+      normalArray[componentIdx + 1] = normalY;
+      normalArray[componentIdx + 2] = normalZ;
 
       if (hasColors) {
         colors = new Float32Array(faces * 3 * 3);
@@ -214,8 +214,8 @@ function parseBinary(data: ArrayBuffer) {
     }
   }
 
-  geometry.setAttribute("position", new BufferAttribute(vertices, 3));
-  geometry.setAttribute("normal", new BufferAttribute(normals, 3));
+  geometry.setAttribute("position", new BufferAttribute(vertexArray, 3));
+  geometry.setAttribute("normal", new BufferAttribute(normalArray, 3));
 
   if (hasColors) {
     geometry.setAttribute("color", new BufferAttribute(colors, 3));
@@ -223,7 +223,7 @@ function parseBinary(data: ArrayBuffer) {
     // geometry.alpha = alpha;
   }
 
-  return geometry;
+  return {vertexArray, normalArray};
 }
 
 function parseASCII(data: string) {
@@ -242,8 +242,8 @@ function parseASCII(data: string) {
     "g"
   );
 
-  var vertices = [];
-  var normals = [];
+  var vertices : number[];
+  var normals : number[];
 
   var normal = new Vector3();
 
@@ -313,7 +313,10 @@ function parseASCII(data: string) {
   geometry.setAttribute("position", new Float32BufferAttribute(vertices, 3));
   geometry.setAttribute("normal", new Float32BufferAttribute(normals, 3));
 
-  return geometry;
+  var vertexArray = new Float32Array(vertices);
+  var normalArray = new Float32Array(normals);
+
+  return {vertexArray, normalArray};
 }
 
 function ensureString(buffer: ArrayBuffer) {
