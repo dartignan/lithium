@@ -12,8 +12,10 @@
     "start": "set NODE_ENV=dev && nodemon --watch ./src --exec \"tsc && yarn electron\""
   },
   "dependencies": {
+    "jszip": "^3.3.0",
     "nodemon": "^2.0.2",
     "three": "^0.115.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "uuid": "^7.0.3"
   }
 }

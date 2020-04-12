@@ -2,7 +2,6 @@ import * as THREE from "three";
 import React, { useCallback, useRef, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "react-three-fiber";
 import { OrbitControls } from "./OrbitControls";
-import { Vector2, Vector3 } from "three";
 
 function Box(props) {
   // This reference will give us direct access to the mesh
@@ -28,7 +27,7 @@ function Box(props) {
       <meshPhongMaterial
         attach="material"
         flatShading={true}
-        color={hovered ? "hotpink" : 0xc0c0c0}
+        color={hovered ? "hotpink" : "yellow"}
       />
     </mesh>
   );
@@ -38,13 +37,11 @@ function Item(props) {
   // This reference will give us direct access to the mesh
   const mesh = useRef();
 
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
+  const [selected, setSelected] = useState(false);
 
   var geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(props.geometryData.vertexArray, 3));
-  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(props.geometryData.normalArray, 3));
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(props.data.mesh.vertexArray, 3));
+  // geometry.setAttribute("normal", new THREE.Float32BufferAttribute(props.geometryData.normalArray, 3));
 
   return (
     <mesh
@@ -52,14 +49,12 @@ function Item(props) {
       ref={mesh}
       geometry={geometry}
       receiveShadow
-      onClick={(e) => setActive(!active)}
-      onPointerOver={(e) => setHover(true)}
-      onPointerOut={(e) => setHover(false)}
+      onClick={(e) => setSelected(!selected)}
     >
       <meshPhongMaterial
         attach="material"
         flatShading={true}
-        color={active ? 0x786fb3 : 0xc0c0c0}
+        color={selected ? 0x786fb3 : 0xc0c0c0}
       />
     </mesh>
   );
@@ -114,7 +109,7 @@ export default function ThreeScene(props) {
         <pointLight castShadow position={[-1000, -1000, 1000]} intensity={0.3} />
 
         {props.items.map((item) => (
-          <Item key={item.id} geometryData={item.geometryData} />
+          <Item key={item.uuid} data={item} />
         ))}
 
         <Box boxBufferGeometry={boxBufferGeometry} position={[0, 1.2, 0]} />

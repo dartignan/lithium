@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
-// import { ThreeMFLoader } from './3MFLoader';
-import { STLLoader } from "./STLLoader";
+import { v4 as uuid } from "uuid";
+import * as ThreeMF from "./3MFLoader";
+import * as STL from "./STLLoader";
+import * as API from "./../../api/src/model";
 
 let win: BrowserWindow;
 
@@ -70,24 +72,34 @@ ipcMain.on("file:open", function (e) {
 
 function handleFileSelection(filePaths: string[]) {
   filePaths.forEach((filePath) => {
-    var fileExtension = filePath.split(".").pop();
+    var fileName = filePath.split("\\").pop();
 
-    // if (fileExtension === '3mf') {
+    if (fileName) {
+      var fileExtension = fileName.split(".").pop();
 
-    //     var loader = new ThreeMFLoader();
-    //     loader.load(filePath, function (build) {
-
-    //  win.webContents.send("item:add", filePath, mesh);
-
-    //     });
-
-    // }
-    // else
-    if (fileExtension === "stl") {
-      var stlLoader = new STLLoader();
-      stlLoader.load(filePath, function (geometry) {
-        win.webContents.send("item:add", filePath, geometry);
-      });
+      if (fileExtension === "3mf") {
+        var loader = new ThreeMF.ThreeMFLoader();
+        loader.load(filePath, function (model) {
+          // win.webContents.send("item:add", filePath, mesh);
+        });
+      } else if (fileExtension === "stl") {
+        var stlLoader = new STL.STLLoader();
+        stlLoader.load(filePath, onSTLLoaded);
+      }
     }
+  });
+}
+
+function onSTLLoaded(stlMeshes:STL.STLMesh[]){
+  stlMeshes.forEach((stlMesh) => {
+    var mesh = new API.Mesh();
+    mesh.vertexArray = stlMesh.vertexArray;
+
+    var item = new API.Item();
+    item.uuid = uuid();
+    item.name = "STL";
+    item.mesh = mesh;
+
+    win.webContents.send("item:add", item);
   });
 }

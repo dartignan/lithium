@@ -26,16 +26,14 @@ import Slider from "@material-ui/core/Slider";
 
 import ThreeScene from "./three";
 
+import * as API from "./../../api/src/model";
+
 import {
   Theme,
   createStyles,
   makeStyles,
   withStyles,
 } from "@material-ui/core/styles";
-
-import { Float32BufferAttribute } from "three";
-import { BufferGeometry } from "three";
-
 
 const { ipcRenderer } = eval("require('electron')");
 
@@ -95,6 +93,7 @@ const useStyles = makeStyles((theme: Theme) =>
     content: {
       width: "100%",
       height: "100%",
+      display: "flex",
     },
 
     // Necessary for content to be below AppBar
@@ -128,22 +127,10 @@ const CustomSlider = withStyles({
   },
 })(Slider);
 
-class Item {
-  id: string;
-  name: string;
-  geometryData: {vertexArray: Float32Array, normalArray: Float32Array};
-
-  constructor(id: string, name: string, geometryData: {vertexArray: Float32Array, normalArray: Float32Array}) {
-    this.id = id;
-    this.name = name;
-    this.geometryData = geometryData;
-  }
-}
-
 function App() {
   const classes = useStyles();
   const [value, setValue] = React.useState<number>(30);
-  const [items, setItems] = React.useState<Item[]>([]);
+  const [items, setItems] = React.useState<API.Item[]>([]);
 
   const handleChange = (event: any, newValue: number | number[]) => {
     setValue(newValue as number);
@@ -153,15 +140,10 @@ function App() {
     //File selected
     ipcRenderer.on("item:add", function (
       e: any,
-      objectName: string,
-      geometryData : {vertexArray: Float32Array, normalArray: Float32Array}
+      item: API.Item,
     ) {
-      var geometry = new BufferGeometry();
 
-      geometry.setAttribute("position", new Float32BufferAttribute(geometryData.vertexArray, 3));
-      geometry.setAttribute("normal", new Float32BufferAttribute(geometryData.normalArray, 3));
-
-      setItems(items => [...items, new Item(geometry.uuid, objectName, geometryData)]);
+      setItems(items => [...items, item]);
     });
   }, []);
 

@@ -55,20 +55,18 @@
  *  var mesh = new THREE.Mesh(geometry, materials);
  */
 
-import {
-  BufferAttribute,
-  BufferGeometry,
-  Float32BufferAttribute,
-  LoaderUtils,
-  Vector3,
-} from "three";
-
 const fs = require("fs");
+
+class STLMesh {
+  vertexArray: Float32Array = new Float32Array();
+  normalArray: Float32Array = new Float32Array();
+  colorArray: Float32Array = new Float32Array();
+}
 
 class STLLoader {
   constructor() {}
 
-  load(url: string, onLoad: (response: {vertexArray: Float32Array, normalArray: Float32Array}) => void) {
+  load(url: string, onLoad: (meshes: STLMesh[]) => void) {
     fs.readFile(url, (err, data) => {
       if (err) throw err;
       var arrayBufferData = data.buffer.slice(
@@ -146,11 +144,10 @@ function parseBinary(data: ArrayBuffer) {
   var dataOffset = 84;
   var faceLength = 12 * 4 + 2;
 
-  var geometry = new BufferGeometry();
+  var mesh = new STLMesh();
 
-  var vertexArray = new Float32Array(faces * 3 * 3);
-  var normalArray = new Float32Array(faces * 3 * 3);
-  var colors = new Float32Array(faces * 3 * 3);
+  mesh.vertexArray = new Float32Array(faces * 3 * 3);
+  mesh.normalArray = new Float32Array(faces * 3 * 3);
 
   // process STL header
   // check for default color in header ("COLOR=rgba" sequence).
@@ -196,38 +193,34 @@ function parseBinary(data: ArrayBuffer) {
       var vertexstart = start + i * 12;
       var componentIdx = face * 3 * 3 + (i - 1) * 3;
 
-      vertexArray[componentIdx] = reader.getFloat32(vertexstart, true);
-      vertexArray[componentIdx + 1] = reader.getFloat32(vertexstart + 4, true);
-      vertexArray[componentIdx + 2] = reader.getFloat32(vertexstart + 8, true);
+      mesh.vertexArray[componentIdx] = reader.getFloat32(vertexstart, true);
+      mesh.vertexArray[componentIdx + 1] = reader.getFloat32(
+        vertexstart + 4,
+        true
+      );
+      mesh.vertexArray[componentIdx + 2] = reader.getFloat32(
+        vertexstart + 8,
+        true
+      );
 
-      normalArray[componentIdx] = normalX;
-      normalArray[componentIdx + 1] = normalY;
-      normalArray[componentIdx + 2] = normalZ;
+      mesh.normalArray[componentIdx] = normalX;
+      mesh.normalArray[componentIdx + 1] = normalY;
+      mesh.normalArray[componentIdx + 2] = normalZ;
 
       if (hasColors) {
-        colors = new Float32Array(faces * 3 * 3);
+        mesh.colorArray = new Float32Array(faces * 3 * 3);
 
-        colors[componentIdx] = r;
-        colors[componentIdx + 1] = g;
-        colors[componentIdx + 2] = b;
+        mesh.colorArray[componentIdx] = r;
+        mesh.colorArray[componentIdx + 1] = g;
+        mesh.colorArray[componentIdx + 2] = b;
       }
     }
   }
 
-  geometry.setAttribute("position", new BufferAttribute(vertexArray, 3));
-  geometry.setAttribute("normal", new BufferAttribute(normalArray, 3));
-
-  if (hasColors) {
-    geometry.setAttribute("color", new BufferAttribute(colors, 3));
-    // geometry.hasColors = true;
-    // geometry.alpha = alpha;
-  }
-
-  return {vertexArray, normalArray};
+  return [mesh];
 }
 
 function parseASCII(data: string) {
-  var geometry = new BufferGeometry();
   var patternSolid = /solid([\s\S]*?)endsolid/g;
   var patternFace = /facet([\s\S]*?)endfacet/g;
   var faceCounter = 0;
@@ -242,19 +235,12 @@ function parseASCII(data: string) {
     "g"
   );
 
-  var vertices : number[];
-  var normals : number[];
-
-  var normal = new Vector3();
-
-  var result;
-
-  var groupCount = 0;
-  var startVertex = 0;
-  var endVertex = 0;
+  var meshes: STLMesh[] = [];
+  var result: RegExpExecArray | null;
 
   while ((result = patternSolid.exec(data)) !== null) {
-    startVertex = endVertex;
+    var vertices: number[] = [];
+    var normals: number[] = [];
 
     var solid = result[0];
 
@@ -264,10 +250,14 @@ function parseASCII(data: string) {
 
       var text = result[0];
 
+      var normalX = 0,
+        normalY = 0,
+        normalZ = 0;
+
       while ((result = patternNormal.exec(text)) !== null) {
-        normal.x = parseFloat(result[1]);
-        normal.y = parseFloat(result[2]);
-        normal.z = parseFloat(result[3]);
+        normalX = parseFloat(result[1]);
+        normalY = parseFloat(result[2]);
+        normalZ = parseFloat(result[3]);
         normalCountPerFace++;
       }
 
@@ -277,9 +267,8 @@ function parseASCII(data: string) {
           parseFloat(result[2]),
           parseFloat(result[3])
         );
-        normals.push(normal.x, normal.y, normal.z);
+        normals.push(normalX, normalY, normalZ);
         vertexCountPerFace++;
-        endVertex++;
       }
 
       // every face have to own ONE valid normal
@@ -303,28 +292,24 @@ function parseASCII(data: string) {
       faceCounter++;
     }
 
-    var start = startVertex;
-    var count = endVertex - startVertex;
+    var mesh = new STLMesh();
 
-    geometry.addGroup(start, count, groupCount);
-    groupCount++;
+    mesh.vertexArray = new Float32Array(vertices);
+    mesh.normalArray = new Float32Array(normals);
+
+    meshes.push(mesh);
   }
 
-  geometry.setAttribute("position", new Float32BufferAttribute(vertices, 3));
-  geometry.setAttribute("normal", new Float32BufferAttribute(normals, 3));
-
-  var vertexArray = new Float32Array(vertices);
-  var normalArray = new Float32Array(normals);
-
-  return {vertexArray, normalArray};
+  return meshes;
 }
 
 function ensureString(buffer: ArrayBuffer) {
   if (typeof buffer !== "string") {
-    return LoaderUtils.decodeText(new Uint8Array(buffer));
+    var decoder = new TextDecoder("utf-8");
+    return decoder.decode(new Uint8Array(buffer));
   }
 
   return buffer;
 }
 
-export { STLLoader };
+export { STLLoader, STLMesh };
