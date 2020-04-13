@@ -8,8 +8,8 @@ let win: BrowserWindow;
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     // frame: false,
     transparent: false,
     webPreferences: {
@@ -72,21 +72,19 @@ ipcMain.on("file:open", function (e) {
 
 function handleFileSelection(filePaths: string[]) {
   filePaths.forEach((filePath) => {
-      var fileExtension = filePath.split(".").pop();
+    var fileExtension = filePath.split(".").pop();
 
-      if (fileExtension === "3mf") {
-        var loader = new ThreeMF.ThreeMFLoader();
-        loader.load(filePath, function (model) {
-          // win.webContents.send("item:add", filePath, mesh);
-        });
-      } else if (fileExtension === "stl") {
-        var stlLoader = new STL.STLLoader();
-        stlLoader.load(filePath, onSTLLoaded);
-      }
+    if (fileExtension === "3mf") {
+      var loader = new ThreeMF.ThreeMFLoader();
+      loader.load(filePath, on3MFLoaded);
+    } else if (fileExtension === "stl") {
+      var stlLoader = new STL.STLLoader();
+      stlLoader.load(filePath, onSTLLoaded);
+    }
   });
 }
 
-function onSTLLoaded(stlMeshes:STL.STLMesh[]){
+function onSTLLoaded(stlMeshes: STL.STLMesh[]) {
   stlMeshes.forEach((stlMesh) => {
     var mesh = new API.Mesh();
     mesh.vertexArray = stlMesh.vertexArray;
@@ -98,4 +96,37 @@ function onSTLLoaded(stlMeshes:STL.STLMesh[]){
 
     win.webContents.send("item:add", item);
   });
+}
+
+function on3MFLoaded(packageData: ThreeMF.PackageData) {
+  packageData.modelParts.forEach((modelPart) => {
+    modelPart.build.forEach((modelItem) => {
+      var item = new API.Item();
+      item.uuid = uuid();
+      item.name = "Item";
+      item.transform = modelItem.transform;
+      process3MFObject(item, modelPart.resources.objects, modelItem.objectId);
+      win.webContents.send("item:add", item);
+    });
+  });
+}
+
+function process3MFObject(
+  parentItem: API.Item,
+  objects: { [key: string]: ThreeMF.ModelObject },
+  objectId: string
+) {
+  var modelObject = objects[objectId];
+
+  modelObject.components.forEach((component) => {
+    var item = new API.Item();
+    item.uuid = uuid();
+    item.name = "Component";
+    item.transform = component.transform;
+    process3MFObject(item, objects, component.objectId);
+    parentItem.subItems.push(item);
+  });
+
+  parentItem.mesh.vertexArray = modelObject.mesh.vertices;
+  parentItem.mesh.triangleArray = modelObject.mesh.triangles;
 }

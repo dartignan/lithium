@@ -1,33 +1,24 @@
+import FS from "fs";
 import JSZip from "jszip";
-
-const fs = require("fs");
+import { JSDOM } from "jsdom";
+const { DOMParser } = new JSDOM("").window;
 
 class ThreeMFLoader {
-  load(url: string, onLoad: (model: ModelData | undefined) => void) {
-    fs.readFile(url, async (err, data) => {
+  load(url: string, onLoad: (packageData: PackageData) => void) {
+    FS.readFile(url, async (err, data) => {
       if (err) throw err;
       var arrayBufferData = data.buffer.slice(
         data.byteOffset,
         data.byteOffset + data.byteLength
       );
-      onLoad(await parse(arrayBufferData as ArrayBuffer));
+      onLoad(await loadDocument(arrayBufferData as ArrayBuffer));
     });
   }
 }
 
-async function parse(data: ArrayBuffer) {
-  var packageData = await loadDocument(data);
-
-  if (packageData) {
-    return packageData.modelParts[0];
-  }
-
-  return undefined;
-}
-
 async function loadDocument(data: ArrayBuffer) {
-  let zip: JSZip | null = null;
-  let file = null;
+  var zipArchive: JSZip;
+  var file = null;
   var decoder = new TextDecoder("utf-8");
 
   var relsName = "";
@@ -40,7 +31,8 @@ async function loadDocument(data: ArrayBuffer) {
   var packageData = new PackageData();
 
   try {
-    zip = new JSZip(data);
+    var zipLoader = new JSZip();
+    zipArchive = await zipLoader.loadAsync(data);
   } catch (e) {
     if (e instanceof ReferenceError) {
       console.error("THREE.3MFLoader: jszip missing and file is compressed.");
@@ -48,11 +40,11 @@ async function loadDocument(data: ArrayBuffer) {
     }
   }
 
-  if (!zip) {
+  if (!zipArchive) {
     return undefined;
   }
 
-  for (file in zip.files) {
+  for (file in zipArchive.files) {
     if (file.match(/\_rels\/.rels$/)) {
       relsName = file;
     } else if (file.match(/3D\/_rels\/.*\.model\.rels$/)) {
@@ -68,13 +60,15 @@ async function loadDocument(data: ArrayBuffer) {
     }
   }
 
-  var relsView = new Uint8Array(await zip.file(relsName).async("arraybuffer"));
+  var relsView = new Uint8Array(
+    await zipArchive.file(relsName).async("arraybuffer")
+  );
   var relsFileText = decoder.decode(relsView);
   packageData.rels = parseRelsXml(relsFileText);
 
   if (modelRelsName) {
     var relsView = new Uint8Array(
-      await zip.file(modelRelsName).async("arraybuffer")
+      await zipArchive.file(modelRelsName).async("arraybuffer")
     );
     var relsFileText = decoder.decode(relsView);
     packageData.modelRels = parseRelsXml(relsFileText);
@@ -82,10 +76,12 @@ async function loadDocument(data: ArrayBuffer) {
 
   for (var i = 0; i < modelPartNames.length; i++) {
     var modelPart = modelPartNames[i];
-    var view = new Uint8Array(await zip.file(modelPart).async("arraybuffer"));
+    var view = new Uint8Array(
+      await zipArchive.file(modelPart).async("arraybuffer")
+    );
 
     var fileText = decoder.decode(view);
-    var xmlData = new DOMParser().parseFromString(fileText, "application/xml");
+    var xmlData = new DOMParser().parseFromString(fileText, "text/xml");
 
     if (xmlData.documentElement.nodeName.toLowerCase() !== "model") {
       console.error(
@@ -110,22 +106,26 @@ async function loadDocument(data: ArrayBuffer) {
 function parseRelsXml(relsFileText: string) {
   var relationships: Relationship[] = [];
 
-  var relsXmlData = new DOMParser().parseFromString(
-    relsFileText,
-    "application/xml"
-  );
+  try {
+    var relsXmlData = new DOMParser().parseFromString(relsFileText, "text/xml");
 
-  var relsNodes = relsXmlData.querySelectorAll("Relationship");
+    var relsNodes = relsXmlData.querySelectorAll("Relationship");
 
-  relsNodes.forEach((relsNode) => {
-    var relationship = new Relationship();
+    relsNodes.forEach((relsNode) => {
+      var relationship = new Relationship();
 
-    relationship.target = relsNode.getAttribute("Target") || "";
-    relationship.id = relsNode.getAttribute("id") || "";
-    relationship.type = relsNode.getAttribute("type") || "";
+      relationship.target = relsNode.getAttribute("Target") || "";
+      relationship.id = relsNode.getAttribute("id") || "";
+      relationship.type = relsNode.getAttribute("type") || "";
 
-    relationships.push(relationship);
-  });
+      relationships.push(relationship);
+    });
+  } catch (e) {
+    if (e instanceof ReferenceError) {
+      console.error("THREE.3MFLoader: jszip missing and file is compressed.");
+      return undefined;
+    }
+  }
 
   return relationships;
 }
@@ -228,7 +228,7 @@ function parseComponentNode(componentNode: Element) {
 
   componentData.objectId = componentNode.getAttribute("objectid") || "0";
   componentData.transform =
-    componentNode.getAttribute("transform") || undefined;
+    parseTransform(componentNode.getAttribute("transform")) || undefined;
 
   return componentData;
 }
@@ -248,9 +248,6 @@ function parseObjectNode(objectNode: HTMLObjectElement) {
 
   objectData.type = objectNode.getAttribute("type") || "model";
   objectData.id = objectNode.getAttribute("id") || "";
-  objectData.pid = objectNode.getAttribute("pid") || undefined;
-  objectData.pindex = objectNode.getAttribute("pindex") || "";
-  objectData.thumbnail = objectNode.getAttribute("thumbnail") || undefined;
   objectData.partnumber = objectNode.getAttribute("partnumber") || undefined;
   objectData.name = objectNode.getAttribute("name") || undefined;
 
@@ -274,9 +271,10 @@ function parseResourcesNode(resourcesNode: Element) {
 
   var objectNodes = resourcesNode.querySelectorAll("object");
 
-  objectNodes.forEach(
-    (objectNode) => (resourcesData.objects["id"] = parseObjectNode(objectNode))
-  );
+  objectNodes.forEach((objectNode) => {
+    var modelObject = parseObjectNode(objectNode);
+    resourcesData.objects[modelObject.id] = modelObject;
+  });
 
   return resourcesData;
 }
@@ -363,14 +361,11 @@ class ModelResources {
 
 class ModelObject {
   id: string = "";
-  pid?: string;
-  pindex: string = "";
   type: string = "model";
   components: ComponentData[] = [];
   mesh: MeshData = new MeshData();
   partnumber?: string;
   name?: string;
-  thumbnail?: string;
 }
 
 class MeshData {
@@ -383,70 +378,23 @@ class TriangleProperties {
   v1: number = 0;
   v2: number = 0;
   v3: number = 0;
-  p1: number = 0;
-  p2: number = 0;
-  p3: number = 0;
-  pid?: string;
 }
 
 class ComponentData {
   objectId: string = "0";
-  transform?: string;
+  transform: Float32Array = new Float32Array();
 }
 
-class BaseMaterialData {
-  name: string = "";
-  displaycolor: string = "";
-  displaypropertiesid: string = "";
-}
-
-class BaseMaterialsData {
-  id: string = "";
-  materials: BaseMaterialData[] = [];
-}
-
-class Texture2dData {
-  id: string = "";
-  path: string = "";
-  contenttype: string = "";
-  tilestyleu: string = "";
-  tilestylev: string = "";
-  filter: string = "";
-}
-
-class Texture2dGroupData {
-  id: string = "";
-  texid: string = "";
-  displaypropertiesid?: string;
-  uvs: Float32Array = new Float32Array();
-}
-
-class ColorGroupData {
-  id: string = "";
-  displaypropertiesid: string = "";
-  colors: Float32Array = new Float32Array();
-}
-
-// export {
-//   Relationship,
-//   PrintTicketParts,
-//   TexturesPart,
-//   OtherParts,
-//   PackageData,
-//   BuildItem,
-//   ModelData,
-//   ModelResources,
-//   ModelObject,
-//   MeshData,
-//   TriangleProperties,
-//   BaseMaterialData,
-//   BaseMaterialsData,
-//   Texture2dData,
-//   Texture2dGroupData,
-//   ComponentData,
-//   ColorGroupData,
-//   MetallicDisplayPropertiesData,
-//   MetallicData,
-// };
+export {
+  Relationship,
+  PackageData,
+  BuildItem,
+  ModelData,
+  ModelResources,
+  ModelObject,
+  MeshData,
+  TriangleProperties,
+  ComponentData,
+};
 
 export { ThreeMFLoader };

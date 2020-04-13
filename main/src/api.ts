@@ -25,6 +25,7 @@ class Item {
 
 class Mesh {
   vertexArray: Float32Array = new Float32Array(0);
+  triangleArray: Uint32Array = new Uint32Array(0);
 }
 
 export { Item, Mesh };
