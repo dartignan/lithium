@@ -58,6 +58,7 @@
 const fs = require("fs");
 
 class STLMesh {
+  name: string = "";
   vertexArray: Float32Array = new Float32Array();
   normalArray: Float32Array = new Float32Array();
   colorArray: Float32Array = new Float32Array();
@@ -67,19 +68,23 @@ class STLLoader {
   constructor() {}
 
   load(url: string, onLoad: (meshes: STLMesh[]) => void) {
+    var fileName = url.split("\\").pop();
+
     fs.readFile(url, (err, data) => {
       if (err) throw err;
       var arrayBufferData = data.buffer.slice(
         data.byteOffset,
         data.byteOffset + data.byteLength
       );
-      onLoad(parse(arrayBufferData));
+      onLoad(parse(fileName, arrayBufferData));
     });
   }
 }
 
-function parse(data: ArrayBuffer) {
-  return isBinary(data) ? parseBinary(data) : parseASCII(ensureString(data));
+function parse(nameRoot: string, data: ArrayBuffer) {
+  return isBinary(data)
+    ? parseBinary(nameRoot, data)
+    : parseASCII(nameRoot, ensureString(data));
 }
 
 function isBinary(data: ArrayBuffer) {
@@ -126,7 +131,7 @@ function matchDataViewAt(query: number[], reader: DataView, offset: number) {
   return true;
 }
 
-function parseBinary(data: ArrayBuffer) {
+function parseBinary(nameRoot: string, data: ArrayBuffer) {
   var reader = new DataView(data);
   var faces = reader.getUint32(80, true);
 
@@ -145,6 +150,7 @@ function parseBinary(data: ArrayBuffer) {
   var faceLength = 12 * 4 + 2;
 
   var mesh = new STLMesh();
+  mesh.name = nameRoot;
 
   mesh.vertexArray = new Float32Array(faces * 3 * 3);
   mesh.normalArray = new Float32Array(faces * 3 * 3);
@@ -220,7 +226,7 @@ function parseBinary(data: ArrayBuffer) {
   return [mesh];
 }
 
-function parseASCII(data: string) {
+function parseASCII(nameRoot: string, data: string) {
   var patternSolid = /solid([\s\S]*?)endsolid/g;
   var patternFace = /facet([\s\S]*?)endfacet/g;
   var faceCounter = 0;
@@ -236,6 +242,7 @@ function parseASCII(data: string) {
   );
 
   var meshes: STLMesh[] = [];
+  var meshCount = 0;
   var result: RegExpExecArray | null;
 
   while ((result = patternSolid.exec(data)) !== null) {
@@ -293,11 +300,13 @@ function parseASCII(data: string) {
     }
 
     var mesh = new STLMesh();
+    mesh.name = meshCount > 0 ? nameRoot + meshCount : nameRoot;
 
     mesh.vertexArray = new Float32Array(vertices);
     mesh.normalArray = new Float32Array(normals);
 
     meshes.push(mesh);
+    meshCount++;
   }
 
   return meshes;

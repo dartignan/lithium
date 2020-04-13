@@ -26,7 +26,8 @@ import Slider from "@material-ui/core/Slider";
 
 import ThreeScene from "./three";
 
-import * as API from "./../../api/src/model";
+// TODO: Separate module for API
+import * as API from "./../../main/src/api";
 
 import {
   Theme,

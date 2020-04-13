@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { v4 as uuid } from "uuid";
 import * as ThreeMF from "./3MFLoader";
 import * as STL from "./STLLoader";
-import * as API from "./../../api/src/model";
+import * as API from "./api";
 
 let win: BrowserWindow;
 
@@ -72,10 +72,7 @@ ipcMain.on("file:open", function (e) {
 
 function handleFileSelection(filePaths: string[]) {
   filePaths.forEach((filePath) => {
-    var fileName = filePath.split("\\").pop();
-
-    if (fileName) {
-      var fileExtension = fileName.split(".").pop();
+      var fileExtension = filePath.split(".").pop();
 
       if (fileExtension === "3mf") {
         var loader = new ThreeMF.ThreeMFLoader();
@@ -86,7 +83,6 @@ function handleFileSelection(filePaths: string[]) {
         var stlLoader = new STL.STLLoader();
         stlLoader.load(filePath, onSTLLoaded);
       }
-    }
   });
 }
 
@@ -97,7 +93,7 @@ function onSTLLoaded(stlMeshes:STL.STLMesh[]){
 
     var item = new API.Item();
     item.uuid = uuid();
-    item.name = "STL";
+    item.name = stlMesh.name;
     item.mesh = mesh;
 
     win.webContents.send("item:add", item);
