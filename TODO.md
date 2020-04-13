@@ -1,8 +1,10 @@
-- Icon
-- Import 3MF
+- Selection
 - List sync
+- Move
 - Delete
-- Header move
 - Clipping
+- Move header
+- Icon
+- Setup
 - ipcRenderer security => https://github.com/electron/electron/issues/9920
 - Immutable pattern, (... operator)

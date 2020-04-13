@@ -23,9 +23,9 @@ function createWindow() {
 
   // win.webContents.openDevTools();
 
-  win.on("closed", () => {
-    win = null;
-  });
+  // win.on("closed", () => {
+  //   win = null;
+  // });
 }
 
 app.on("ready", createWindow);
@@ -98,23 +98,25 @@ function onSTLLoaded(stlMeshes: STL.STLMesh[]) {
   });
 }
 
-function on3MFLoaded(packageData: ThreeMF.PackageData) {
-  packageData.modelParts.forEach((modelPart) => {
-    modelPart.build.forEach((modelItem) => {
-      var item = new API.Item();
-      item.uuid = uuid();
-      item.name = "Item";
-      item.transform = modelItem.transform;
-      process3MFObject(item, modelPart.resources.objects, modelItem.objectId);
-      win.webContents.send("item:add", item);
+function on3MFLoaded(packageData: ThreeMF.PackageData | undefined) {
+  if (packageData) {
+    packageData.modelParts.forEach((modelPart) => {
+      modelPart.build.forEach((modelItem) => {
+        var item = new API.Item();
+        item.uuid = uuid();
+        item.name = "Item";
+        item.transform = modelItem.transform;
+        process3MFObject(item, modelPart.resources.objects, modelItem.objectId);
+        win.webContents.send("item:add", item);
+      });
     });
-  });
+  }
 }
 
 function process3MFObject(
   parentItem: API.Item,
   objects: { [key: string]: ThreeMF.ModelObject },
-  objectId: string
+  objectId: number
 ) {
   var modelObject = objects[objectId];
 
@@ -127,6 +129,8 @@ function process3MFObject(
     parentItem.subItems.push(item);
   });
 
-  parentItem.mesh.vertexArray = modelObject.mesh.vertexArray;
-  parentItem.mesh.triangleArray = modelObject.mesh.triangleArray;
+  if (modelObject.mesh) {
+    parentItem.mesh.vertexArray = modelObject.mesh.vertexArray;
+    parentItem.mesh.triangleArray = modelObject.mesh.triangleArray;
+  }
 }

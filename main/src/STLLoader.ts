@@ -66,7 +66,7 @@ class STLMesh {
 
 class STLLoader {
   load(url: string, onLoad: (meshes: STLMesh[]) => void) {
-    var fileName = url.split("\\").pop();
+    var fileName = url.split("\\").pop() || "STL";
 
     FS.readFile(url, (err, data) => {
       if (err) throw err;

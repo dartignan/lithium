@@ -4,7 +4,7 @@ import { JSDOM } from "jsdom";
 const { DOMParser } = new JSDOM("").window;
 
 class ThreeMFLoader {
-  load(url: string, onLoad: (packageData: PackageData) => void) {
+  load(url: string, onLoad: (packageData: PackageData | undefined) => void) {
     FS.readFile(url, async (err, data) => {
       if (err) throw err;
       var arrayBufferData = data.buffer.slice(
@@ -17,7 +17,6 @@ class ThreeMFLoader {
 }
 
 async function loadDocument(data: ArrayBuffer) {
-  var zipArchive: JSZip;
   var file = null;
   var decoder = new TextDecoder("utf-8");
 
@@ -30,15 +29,7 @@ async function loadDocument(data: ArrayBuffer) {
 
   var packageData = new PackageData();
 
-  try {
-    var zipLoader = new JSZip();
-    zipArchive = await zipLoader.loadAsync(data);
-  } catch (e) {
-    if (e instanceof ReferenceError) {
-      console.error("THREE.3MFLoader: jszip missing and file is compressed.");
-      return undefined;
-    }
-  }
+  var zipArchive = await new JSZip().loadAsync(data);
 
   if (!zipArchive) {
     return undefined;
@@ -106,26 +97,19 @@ async function loadDocument(data: ArrayBuffer) {
 function parseRelsXml(relsFileText: string) {
   var relationships: Relationship[] = [];
 
-  try {
-    var relsXmlData = new DOMParser().parseFromString(relsFileText, "text/xml");
+  var relsXmlData = new DOMParser().parseFromString(relsFileText, "text/xml");
 
-    var relsNodes = relsXmlData.querySelectorAll("Relationship");
+  var relsNodes = relsXmlData.querySelectorAll("Relationship");
 
-    relsNodes.forEach((relsNode) => {
-      var relationship = new Relationship();
+  relsNodes.forEach((relsNode) => {
+    var relationship = new Relationship();
 
-      relationship.target = relsNode.getAttribute("Target") || "";
-      relationship.id = relsNode.getAttribute("id") || "";
-      relationship.type = relsNode.getAttribute("type") || "";
+    relationship.target = relsNode.getAttribute("Target") || "";
+    relationship.id = relsNode.getAttribute("id") || "";
+    relationship.type = relsNode.getAttribute("type") || "";
 
-      relationships.push(relationship);
-    });
-  } catch (e) {
-    if (e instanceof ReferenceError) {
-      console.error("THREE.3MFLoader: jszip missing and file is compressed.");
-      return undefined;
-    }
-  }
+    relationships.push(relationship);
+  });
 
   return relationships;
 }
@@ -158,52 +142,59 @@ function parseMetadataNodes(metadataNodes: NodeListOf<SVGMetadataElement>) {
   return metadataData;
 }
 
-function parseMeshNode(meshNode: Element) {
-  var meshData = new MeshData();
+function parseMeshNode(meshNode: Element | null) {
+  if(meshNode)
+  {
+    var meshData = new MeshData();
 
-  var vertices = [];
-  var vertexNodes = meshNode.querySelectorAll("vertices vertex");
-
-  for (var i = 0; i < vertexNodes.length; i++) {
-    var vertexNode = vertexNodes[i];
-    var x = vertexNode.getAttribute("x");
-    var y = vertexNode.getAttribute("y");
-    var z = vertexNode.getAttribute("z");
-
-    if (x && y && z) {
-      vertices.push(parseFloat(x), parseFloat(y), parseFloat(z));
+    var vertices = [];
+    var vertexNodes = meshNode.querySelectorAll("vertices vertex");
+  
+    for (var i = 0; i < vertexNodes.length; i++) {
+      var vertexNode = vertexNodes[i];
+      var x = vertexNode.getAttribute("x");
+      var y = vertexNode.getAttribute("y");
+      var z = vertexNode.getAttribute("z");
+  
+      if (x && y && z) {
+        vertices.push(parseFloat(x), parseFloat(y), parseFloat(z));
+      }
     }
-  }
-
-  var triangles = [];
-  var triangleNodes = meshNode.querySelectorAll("triangles triangle");
-
-  for (var i = 0; i < triangleNodes.length; i++) {
-    var triangleNode = triangleNodes[i];
-    var v1 = triangleNode.getAttribute("v1");
-    var v2 = triangleNode.getAttribute("v2");
-    var v3 = triangleNode.getAttribute("v3");
-
-    if (v1 && v2 && v3) {
-      triangles.push(parseInt(v1), parseInt(v2), parseInt(v3));
+  
+    var triangles = [];
+    var triangleNodes = meshNode.querySelectorAll("triangles triangle");
+  
+    for (var i = 0; i < triangleNodes.length; i++) {
+      var triangleNode = triangleNodes[i];
+      var v1 = triangleNode.getAttribute("v1");
+      var v2 = triangleNode.getAttribute("v2");
+      var v3 = triangleNode.getAttribute("v3");
+  
+      if (v1 && v2 && v3) {
+        triangles.push(parseInt(v1), parseInt(v2), parseInt(v3));
+      }
     }
+  
+    meshData.vertexArray = new Float32Array(vertices);
+    meshData.triangleArray = new Uint32Array(triangles);
+  
+    return meshData;
   }
-
-  meshData.vertexArray = new Float32Array(vertices);
-  meshData.triangleArray = new Uint32Array(triangles);
-
-  return meshData;
+ 
+  return undefined;
 }
 
-function parseComponentsNode(componentsNode: Element) {
+function parseComponentsNode(componentsNode: Element | null) {
   var components: ComponentData[] = [];
 
-  var componentNodes = componentsNode.querySelectorAll("component");
+  if(componentsNode){
+    var componentNodes = componentsNode.querySelectorAll("component");
 
-  componentNodes.forEach((componentNode) => {
-    var componentData = parseComponentNode(componentNode);
-    components.push(componentData);
-  });
+    componentNodes.forEach((componentNode) => {
+      var componentData = parseComponentNode(componentNode);
+      components.push(componentData);
+    });
+  }
 
   return components;
 }
@@ -211,79 +202,73 @@ function parseComponentsNode(componentsNode: Element) {
 function parseComponentNode(componentNode: Element) {
   var componentData = new ComponentData();
 
-  componentData.objectId = componentNode.getAttribute("objectid") || "0";
-  componentData.transform =
-    parseTransform(componentNode.getAttribute("transform")) || undefined;
+  componentData.objectId = parseInt(
+    componentNode.getAttribute("objectid") || "0"
+  );
+  componentData.transform = parseTransform(
+    componentNode.getAttribute("transform")
+  );
 
   return componentData;
 }
 
-function parseTransform(transform: string) {
-  var transformComponents: number[] = [];
+function parseTransform(transform: string | null) {
+  if (transform) {
+    var transformComponents: number[] = [];
 
-  transform.split(" ").forEach((transformComponent) => {
-    transformComponents.push(parseFloat(transformComponent));
-  });
+    transform.split(" ").forEach((transformComponent) => {
+      transformComponents.push(parseFloat(transformComponent));
+    });
 
-  return new Float32Array(transformComponents);
+    return new Float32Array(transformComponents);
+  }
+
+  return new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
 }
 
 function parseObjectNode(objectNode: HTMLObjectElement) {
   var objectData = new ModelObject();
 
   objectData.type = objectNode.getAttribute("type") || "model";
-  objectData.id = objectNode.getAttribute("id") || "";
+  objectData.id = parseInt(objectNode.getAttribute("id") || "0");
   objectData.partnumber = objectNode.getAttribute("partnumber") || undefined;
   objectData.name = objectNode.getAttribute("name") || undefined;
-
-  var meshNode = objectNode.querySelector("mesh");
-
-  if (meshNode) {
-    objectData.mesh = parseMeshNode(meshNode);
-  }
-
-  var componentsNode = objectNode.querySelector("components");
-
-  if (componentsNode) {
-    objectData.components = parseComponentsNode(componentsNode);
-  }
+  objectData.mesh = parseMeshNode(objectNode.querySelector("mesh"));
+  objectData.components = parseComponentsNode(
+    objectNode.querySelector("components")
+  );
 
   return objectData;
 }
 
-function parseResourcesNode(resourcesNode: Element) {
+function parseResourcesNode(resourcesNode: Element | null) {
   var resourcesData = new ModelResources();
 
-  var objectNodes = resourcesNode.querySelectorAll("object");
+  if(resourcesNode){
+    var objectNodes = resourcesNode.querySelectorAll("object");
 
-  objectNodes.forEach((objectNode) => {
-    var modelObject = parseObjectNode(objectNode);
-    resourcesData.objects[modelObject.id] = modelObject;
-  });
+    objectNodes.forEach((objectNode) => {
+      var modelObject = parseObjectNode(objectNode);
+      resourcesData.objects[modelObject.id] = modelObject;
+    });
+  }
 
   return resourcesData;
 }
 
-function parseBuildNode(buildNode: Element) {
+function parseBuildNode(buildNode: Element | null) {
   var buildData: BuildItem[] = [];
-  var itemNodes = buildNode.querySelectorAll("item");
 
-  itemNodes.forEach((itemNode) => {
-    var objectid = itemNode.getAttribute("objectid");
-    var transform = itemNode.getAttribute("transform");
+  if(buildNode) {
+    var itemNodes = buildNode.querySelectorAll("item");
 
-    var buildItem = new BuildItem();
-
-    if (objectid) {
-      buildItem.objectId = objectid;
-    }
-
-    if (transform) {
-      buildItem.transform = parseTransform(transform);
-    }
-
-    buildData.push(buildItem);
-  });
+    itemNodes.forEach((itemNode) => {
+      var buildItem = new BuildItem();
+      buildItem.objectId = parseInt(itemNode.getAttribute("objectid") || "0");
+      buildItem.transform = parseTransform(itemNode.getAttribute("transform"));
+      buildData.push(buildItem);
+    });
+  }
 
   return buildData;
 }
@@ -291,26 +276,14 @@ function parseBuildNode(buildNode: Element) {
 function parseModelNode(modelNode: Element) {
   var modelData = new ModelData();
 
-  var unit = modelNode.getAttribute("unit");
-  var metadataNodes = modelNode.querySelectorAll("metadata");
-  var resourcesNode = modelNode.querySelector("resources");
-  var buildNode = modelNode.querySelector("build");
-
-  if (unit) {
-    modelData.unit = unit;
-  }
-
-  if (metadataNodes) {
-    modelData.metadata = parseMetadataNodes(metadataNodes);
-  }
-
-  if (resourcesNode) {
-    modelData.resources = parseResourcesNode(resourcesNode);
-  }
-
-  if (buildNode) {
-    modelData.build = parseBuildNode(buildNode);
-  }
+  modelData.unit = modelNode.getAttribute("unit") || "millimeter";
+  modelData.metadata = parseMetadataNodes(
+    modelNode.querySelectorAll("metadata")
+  );
+  modelData.resources = parseResourcesNode(
+    modelNode.querySelector("resources")
+  );
+  modelData.build = parseBuildNode(modelNode.querySelector("build"));
 
   return modelData;
 }
@@ -328,7 +301,7 @@ class PackageData {
 }
 
 class BuildItem {
-  objectId: string = "";
+  objectId: number = 0;
   transform: Float32Array = new Float32Array();
 }
 
@@ -345,12 +318,12 @@ class ModelResources {
 }
 
 class ModelObject {
-  id: string = "";
+  id: number = 0;
   type: string = "model";
   partnumber?: string;
   name?: string;
   components: ComponentData[] = [];
-  mesh: MeshData = new MeshData();
+  mesh?: MeshData = new MeshData();
 }
 
 class MeshData {
@@ -359,7 +332,7 @@ class MeshData {
 }
 
 class ComponentData {
-  objectId: string = "0";
+  objectId: number = 0;
   transform: Float32Array = new Float32Array();
 }
 

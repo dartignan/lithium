@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import React, { useCallback, useRef, useState, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "react-three-fiber";
+import { Canvas, useThree } from "react-three-fiber";
 import { OrbitControls } from "./OrbitControls";
+import { Matrix4 } from "three";
 
 function Item(props) {
   // This reference will give us direct access to the mesh
@@ -9,21 +10,44 @@ function Item(props) {
 
   const [selected, setSelected] = useState(false);
 
+  const transform = props.item.transform;
+
+  const matrix = new Matrix4();
+  matrix.set(
+    transform[0],
+    transform[3],
+    transform[6],
+    transform[9],
+    transform[1],
+    transform[4],
+    transform[7],
+    transform[10],
+    transform[2],
+    transform[5],
+    transform[8],
+    transform[11],
+    0,
+    0,
+    0,
+    1
+  );
+
   var geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
     "position",
-    new THREE.Float32BufferAttribute(props.data.mesh.vertexArray, 3)
+    new THREE.Float32BufferAttribute(props.item.mesh.vertexArray, 3)
   );
 
-  if (props.data.mesh.triangleArray.length > 0) {
+  if (props.item.mesh.triangleArray.length > 0) {
     geometry.setIndex(
-      new THREE.Uint32BufferAttribute(props.data.mesh.triangleArray, 1)
+      new THREE.Uint32BufferAttribute(props.item.mesh.triangleArray, 1)
     );
   }
 
   return (
     <mesh
       {...props}
+      matrix={matrix}
       ref={mesh}
       geometry={geometry}
       receiveShadow
@@ -34,6 +58,9 @@ function Item(props) {
         flatShading={true}
         color={selected ? 0x786fb3 : 0xc0c0c0}
       />
+      {props.item.subItems.map((subItem) => (
+        <Item key={subItem.uuid} item={subItem} />
+      ))}
     </mesh>
   );
 }
@@ -86,7 +113,7 @@ export default function ThreeScene(props) {
         />
 
         {props.items.map((item) => (
-          <Item key={item.uuid} data={item} />
+          <Item key={item.uuid} item={item} />
         ))}
       </Canvas>
     </div>
