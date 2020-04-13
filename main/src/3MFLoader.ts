@@ -175,7 +175,6 @@ function parseMeshNode(meshNode: Element) {
     }
   }
 
-  var triangleProperties = [];
   var triangles = [];
   var triangleNodes = meshNode.querySelectorAll("triangles triangle");
 
@@ -185,27 +184,13 @@ function parseMeshNode(meshNode: Element) {
     var v2 = triangleNode.getAttribute("v2");
     var v3 = triangleNode.getAttribute("v3");
 
-    var triangleProperty = new TriangleProperties();
-
     if (v1 && v2 && v3) {
-      triangleProperty.v1 = parseInt(v1);
-      triangleProperty.v2 = parseInt(v2);
-      triangleProperty.v3 = parseInt(v3);
-
-      triangles.push(
-        triangleProperty.v1,
-        triangleProperty.v2,
-        triangleProperty.v3
-      );
-    }
-
-    if (0 < Object.keys(triangleProperty).length) {
-      triangleProperties.push(triangleProperty);
+      triangles.push(parseInt(v1), parseInt(v2), parseInt(v3));
     }
   }
 
-  meshData.triangleProperties = triangleProperties;
-  meshData.triangles = new Uint32Array(triangles);
+  meshData.vertexArray = new Float32Array(vertices);
+  meshData.triangleArray = new Uint32Array(triangles);
 
   return meshData;
 }
@@ -234,13 +219,13 @@ function parseComponentNode(componentNode: Element) {
 }
 
 function parseTransform(transform: string) {
-  var t: number[] = [];
+  var transformComponents: number[] = [];
 
-  transform.split(" ").forEach((s) => {
-    t.push(parseFloat(s));
+  transform.split(" ").forEach((transformComponent) => {
+    transformComponents.push(parseFloat(transformComponent));
   });
 
-  return new Float32Array(t);
+  return new Float32Array(transformComponents);
 }
 
 function parseObjectNode(objectNode: HTMLObjectElement) {
@@ -362,22 +347,15 @@ class ModelResources {
 class ModelObject {
   id: string = "";
   type: string = "model";
-  components: ComponentData[] = [];
-  mesh: MeshData = new MeshData();
   partnumber?: string;
   name?: string;
+  components: ComponentData[] = [];
+  mesh: MeshData = new MeshData();
 }
 
 class MeshData {
-  vertices: Float32Array = new Float32Array();
-  triangleProperties: TriangleProperties[] = [];
-  triangles: Uint32Array = new Uint32Array();
-}
-
-class TriangleProperties {
-  v1: number = 0;
-  v2: number = 0;
-  v3: number = 0;
+  vertexArray: Float32Array = new Float32Array();
+  triangleArray: Uint32Array = new Uint32Array();
 }
 
 class ComponentData {
@@ -393,7 +371,6 @@ export {
   ModelResources,
   ModelObject,
   MeshData,
-  TriangleProperties,
   ComponentData,
 };
 

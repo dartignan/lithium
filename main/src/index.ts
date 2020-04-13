@@ -127,6 +127,6 @@ function process3MFObject(
     parentItem.subItems.push(item);
   });
 
-  parentItem.mesh.vertexArray = modelObject.mesh.vertices;
-  parentItem.mesh.triangleArray = modelObject.mesh.triangles;
+  parentItem.mesh.vertexArray = modelObject.mesh.vertexArray;
+  parentItem.mesh.triangleArray = modelObject.mesh.triangleArray;
 }
