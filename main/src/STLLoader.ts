@@ -55,7 +55,7 @@
  *  var mesh = new THREE.Mesh(geometry, materials);
  */
 
-const fs = require("fs");
+import FS from "fs";
 
 class STLMesh {
   name: string = "";
@@ -65,12 +65,10 @@ class STLMesh {
 }
 
 class STLLoader {
-  constructor() {}
-
   load(url: string, onLoad: (meshes: STLMesh[]) => void) {
     var fileName = url.split("\\").pop();
 
-    fs.readFile(url, (err, data) => {
+    FS.readFile(url, (err, data) => {
       if (err) throw err;
       var arrayBufferData = data.buffer.slice(
         data.byteOffset,
@@ -88,7 +86,7 @@ function parse(nameRoot: string, data: ArrayBuffer) {
 }
 
 function isBinary(data: ArrayBuffer) {
-  var expect, face_size, n_faces, reader;
+  var expect: number, face_size: number, n_faces: number, reader: DataView;
   reader = new DataView(data);
   face_size = (32 / 8) * 3 + (32 / 8) * 3 * 3 + 16 / 8;
   n_faces = reader.getUint32(80, true);

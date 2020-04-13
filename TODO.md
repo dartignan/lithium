@@ -1,7 +1,8 @@
-- Close, Minimize, Maximize/Restore
-- Import STL
+- Icon
 - Import 3MF
 - List sync
+- Delete
+- Header move
 - Clipping
-- Sécurité ipcRenderer => https://github.com/electron/electron/issues/9920
-- Pattern immutable, opérateur ...
+- ipcRenderer security => https://github.com/electron/electron/issues/9920
+- Immutable pattern, (... operator)
