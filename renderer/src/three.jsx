@@ -8,9 +8,9 @@ function Item(props) {
   // This reference will give us direct access to the mesh
   const mesh = useRef();
 
-  const [selected, setSelected] = useState(false);
+  const item = props.item;
 
-  const transform = props.item.transform;
+  const transform = item.transform;
 
   const matrix = new Matrix4();
   matrix.set(
@@ -32,15 +32,20 @@ function Item(props) {
     1
   );
 
+  const select = (event) => {
+    item.selected = !item.selected;
+    props.itemChanged();
+  };
+
   var geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
     "position",
-    new THREE.Float32BufferAttribute(props.item.mesh.vertexArray, 3)
+    new THREE.Float32BufferAttribute(item.mesh.vertexArray, 3)
   );
 
-  if (props.item.mesh.triangleArray.length > 0) {
+  if (item.mesh.triangleArray.length > 0) {
     geometry.setIndex(
-      new THREE.Uint32BufferAttribute(props.item.mesh.triangleArray, 1)
+      new THREE.Uint32BufferAttribute(item.mesh.triangleArray, 1)
     );
   }
 
@@ -51,14 +56,14 @@ function Item(props) {
       ref={mesh}
       geometry={geometry}
       receiveShadow
-      onClick={(e) => setSelected(!selected)}
+      onClick={select}
     >
       <meshPhongMaterial
         attach="material"
         flatShading={true}
-        color={selected ? 0x786fb3 : 0xc0c0c0}
+        color={item.selected ? 0x786fb3 : 0xc0c0c0}
       />
-      {props.item.subItems.map((subItem) => (
+      {item.subItems.map((subItem) => (
         <Item key={subItem.uuid} item={subItem} />
       ))}
     </mesh>
@@ -89,12 +94,21 @@ export default function ThreeScene(props) {
     []
   );
 
+  const itemChanged = ()=>{
+    props.onItemsChanged();
+  }
+
   return (
     <div style={{ width: "100%", height: "100%" }} onMouseMove={onMouseMove}>
       <Canvas
         gl={{ alpha: false, antialias: true, logarithmicDepthBuffer: true }}
         orthographic
-        camera={{ position: [100, -100, 150], zoom: 2, up: [0, 0, 1] }}
+        camera={{
+          position: [1000, -1000, 1500],
+          far: 3000,
+          zoom: 2,
+          up: [0, 0, 1],
+        }}
         onCreated={({ gl }) => {
           gl.setClearColor("grey");
           gl.toneMapping = THREE.ACESFilmicToneMapping;
@@ -113,7 +127,7 @@ export default function ThreeScene(props) {
         />
 
         {props.items.map((item) => (
-          <Item key={item.uuid} item={item} />
+          <Item key={item.uuid} item={item} itemChanged={itemChanged} />
         ))}
       </Canvas>
     </div>

@@ -6,5 +6,7 @@
 - Move header
 - Icon
 - Setup
+- Light/Material
+- API location
 - ipcRenderer security => https://github.com/electron/electron/issues/9920
 - Immutable pattern, (... operator)

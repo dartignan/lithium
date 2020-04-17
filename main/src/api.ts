@@ -1,5 +1,5 @@
 class Item {
-  uuid: string="";
+  uuid: string = "";
   name: string = "";
   subItems: Item[] = [];
   transform: Float32Array = new Float32Array([
@@ -21,6 +21,7 @@ class Item {
     1,
   ]);
   mesh: Mesh = new Mesh();
+  selected: boolean = false;
 }
 
 class Mesh {

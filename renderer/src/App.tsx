@@ -17,7 +17,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Drawer from "@material-ui/core/Drawer";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
+import MenuItem from "@material-ui/core/MenuItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import ExtensionIcon from "@material-ui/icons/Extension";
@@ -137,13 +137,22 @@ function App() {
     setValue(newValue as number);
   };
 
+  const clickListItem = (item:API.Item, event:any) => {
+    item.selected=!item.selected;
+    setItems(items => [...items]);
+  }
+
+  const onItemsChanged = () =>{
+    setItems(items => [...items]);
+  }
+
   useEffect(() => {
     //File selected
     ipcRenderer.on("item:add", function (
       e: any,
       item: API.Item,
     ) {
-
+      item.selected = true;
       setItems(items => [...items, item]);
     });
   }, []);
@@ -200,18 +209,18 @@ function App() {
           <div className={classes.toolbar} />
           <List>
             {items.map((item) => (
-              <ListItem button key={item.name}>
+              <MenuItem button key={item.name} selected={item.selected} onClick={e => clickListItem(item, e)}>
                 <ListItemIcon>
                   <ExtensionIcon />
                 </ListItemIcon>
                 <ListItemText primary={item.name} />
-              </ListItem>
+              </MenuItem>
             ))}
           </List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <ThreeScene items={items} />
+          <ThreeScene items={items} onItemsChanged={onItemsChanged} />
         </main>
         <Drawer
           className={classes.rightDrawer}
