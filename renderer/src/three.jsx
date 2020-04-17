@@ -9,6 +9,7 @@ function Item(props) {
   const mesh = useRef();
 
   const item = props.item;
+  const selectItem = props.selectItemCallback;
 
   const transform = item.transform;
 
@@ -33,8 +34,13 @@ function Item(props) {
   );
 
   const select = (event) => {
-    item.selected = !item.selected;
-    props.itemChanged();
+    event.stopPropagation(); // Select only the item closest to the camera
+
+    if (event.ctrlKey || event.shiftKey) {
+      selectItem(item, true);
+    } else {
+      selectItem(item);
+    }
   };
 
   var geometry = new THREE.BufferGeometry();
@@ -94,10 +100,6 @@ export default function ThreeScene(props) {
     []
   );
 
-  const itemChanged = ()=>{
-    props.onItemsChanged();
-  }
-
   return (
     <div style={{ width: "100%", height: "100%" }} onMouseMove={onMouseMove}>
       <Canvas
@@ -127,7 +129,11 @@ export default function ThreeScene(props) {
         />
 
         {props.items.map((item) => (
-          <Item key={item.uuid} item={item} itemChanged={itemChanged} />
+          <Item
+            key={item.uuid}
+            item={item}
+            selectItemCallback={props.selectItemCallback}
+          />
         ))}
       </Canvas>
     </div>

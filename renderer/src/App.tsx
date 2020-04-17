@@ -137,23 +137,34 @@ function App() {
     setValue(newValue as number);
   };
 
-  const clickListItem = (item:API.Item, event:any) => {
-    item.selected=!item.selected;
-    setItems(items => [...items]);
-  }
+  const clickListItem = (item: API.Item, event: any) => {
+    if (event.ctrlKey || event.shiftKey) {
+      selectItem(item, true);
+    } else {
+      selectItem(item);
+    }
+  };
 
-  const onItemsChanged = () =>{
-    setItems(items => [...items]);
-  }
+  const selectItem = (item?: API.Item, toggleSelection?: boolean) => {
+    if (item) {
+      if (toggleSelection) {
+        item.selected = !item.selected;
+      } else {
+        items.forEach((item) => (item.selected = false));
+        item.selected = true;
+      }
+    } else {
+      items.forEach((item) => (item.selected = false));
+    }
+
+    setItems((items) => [...items]);
+  };
 
   useEffect(() => {
     //File selected
-    ipcRenderer.on("item:add", function (
-      e: any,
-      item: API.Item,
-    ) {
+    ipcRenderer.on("item:add", function (e: any, item: API.Item) {
       item.selected = true;
-      setItems(items => [...items, item]);
+      setItems((items) => [...items, item]);
     });
   }, []);
 
@@ -209,7 +220,12 @@ function App() {
           <div className={classes.toolbar} />
           <List>
             {items.map((item) => (
-              <MenuItem button key={item.name} selected={item.selected} onClick={e => clickListItem(item, e)}>
+              <MenuItem
+                button
+                key={item.name}
+                selected={item.selected}
+                onClick={(e) => clickListItem(item, e)}
+              >
                 <ListItemIcon>
                   <ExtensionIcon />
                 </ListItemIcon>
@@ -220,7 +236,7 @@ function App() {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <ThreeScene items={items} onItemsChanged={onItemsChanged} />
+          <ThreeScene items={items} selectItemCallback={selectItem} />
         </main>
         <Drawer
           className={classes.rightDrawer}
