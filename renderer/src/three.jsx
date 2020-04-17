@@ -100,6 +100,10 @@ export default function ThreeScene(props) {
     []
   );
 
+  const unSelectAll = () => {
+    props.selectItemCallback();
+  };
+
   return (
     <div style={{ width: "100%", height: "100%" }} onMouseMove={onMouseMove}>
       <Canvas
@@ -116,6 +120,7 @@ export default function ThreeScene(props) {
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.outputEncoding = THREE.sRGBEncoding;
         }}
+        onPointerMissed={unSelectAll}
       >
         <CameraController />
         <ambientLight intensity={0.2} />
