@@ -1,6 +1,5 @@
 - Window select
 - Move
-- Delete
 - Clipping
 - Move header
 - Icon

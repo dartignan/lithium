@@ -136,12 +136,30 @@ function App() {
     setValue(newValue as number);
   };
 
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Delete") {
+      deleteSelectedItems();
+    }
+  };
+
   const clickListItem = (item: API.Item, event: any) => {
     if (event.ctrlKey || event.shiftKey) {
       selectItem(item, true);
     } else {
       selectItem(item);
     }
+  };
+
+  const deleteSelectedItems = () => {
+    var newItems: API.Item[] = [];
+
+    items.forEach((item) => {
+      if (!item.selected) {
+        newItems.push(item);
+      }
+    });
+
+    setItems([...newItems]);
   };
 
   const selectItem = (item?: API.Item, toggleSelection?: boolean) => {
@@ -169,7 +187,7 @@ function App() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <div className={classes.root}>
+      <div className={classes.root} onKeyDown={handleKeyDown}>
         <CssBaseline />
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
