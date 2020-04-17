@@ -24,9 +24,8 @@ import ExtensionIcon from "@material-ui/icons/Extension";
 
 import Slider from "@material-ui/core/Slider";
 
-import ThreeScene from "./three";
+import ThreeCanvas from "./ThreeComponents";
 
-// TODO: Separate module for API
 import * as API from "./../../main/src/api";
 
 import {
@@ -236,7 +235,7 @@ function App() {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <ThreeScene items={items} selectItemCallback={selectItem} />
+          <ThreeCanvas items={items} selectItemCallback={selectItem} />
         </main>
         <Drawer
           className={classes.rightDrawer}

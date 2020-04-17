@@ -2,18 +2,18 @@ import * as THREE from "three";
 import React, { useCallback, useRef, useState, useEffect } from "react";
 import { Canvas, useThree } from "react-three-fiber";
 import { OrbitControls } from "./OrbitControls";
-import { Matrix4 } from "three";
+import * as API from "./../../main/src/api";
 
-function Item(props) {
+function Item(props: any) {
   // This reference will give us direct access to the mesh
   const mesh = useRef();
 
-  const item = props.item;
+  const item = props.item as API.Item;
   const selectItem = props.selectItemCallback;
 
   const transform = item.transform;
 
-  const matrix = new Matrix4();
+  const matrix = new THREE.Matrix4();
   matrix.set(
     transform[0],
     transform[3],
@@ -33,7 +33,7 @@ function Item(props) {
     1
   );
 
-  const select = (event) => {
+  const select = (event: any) => {
     event.stopPropagation(); // Select only the item closest to the camera
 
     if (event.ctrlKey || event.shiftKey) {
@@ -69,7 +69,7 @@ function Item(props) {
         flatShading={true}
         color={item.selected ? 0x786fb3 : 0xc0c0c0}
       />
-      {item.subItems.map((subItem) => (
+      {item.subItems.map((subItem: API.Item) => (
         <Item key={subItem.uuid} item={subItem} />
       ))}
     </mesh>
@@ -92,7 +92,7 @@ const CameraController = () => {
   return null;
 };
 
-export default function ThreeScene(props) {
+export default function ThreeCanvas(props: any) {
   const mouse = useRef([0, 0]);
   const onMouseMove = useCallback(
     ({ clientX: x, clientY: y }) =>
@@ -133,7 +133,7 @@ export default function ThreeScene(props) {
           intensity={0.3}
         />
 
-        {props.items.map((item) => (
+        {props.items.map((item: API.Item) => (
           <Item
             key={item.uuid}
             item={item}

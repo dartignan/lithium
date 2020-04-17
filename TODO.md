@@ -1,5 +1,4 @@
-- Selection
-- List sync
+- Window select
 - Move
 - Delete
 - Clipping
