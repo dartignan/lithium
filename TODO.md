@@ -1,7 +1,7 @@
-- Window select
 - Move
-- Clipping
 - Move header
+- Maximize/Restore
+- Window select
 - Icon
 - Setup
 - Light/Material
