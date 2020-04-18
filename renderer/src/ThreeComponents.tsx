@@ -2,6 +2,7 @@ import * as THREE from "three";
 import React, { useCallback, useRef, useEffect, useState } from "react";
 import { Canvas, useThree } from "react-three-fiber";
 import { OrbitControls } from "./OrbitControls";
+import { useDrag } from "react-use-gesture";
 import * as API from "./../../main/src/api";
 
 export default function ThreeCanvas(props: any) {
@@ -62,8 +63,6 @@ export default function ThreeCanvas(props: any) {
           intensity={0.3}
         />
 
-        <planeHelper plane={clippingPlane} size={100} />
-
         {props.items.map((item: API.Item) => (
           <Item
             key={item.uuid}
@@ -74,6 +73,8 @@ export default function ThreeCanvas(props: any) {
             clippingPlane={clippingPlane}
           />
         ))}
+
+        {/* <planeHelper plane={clippingPlane} size={350} /> */}
       </Canvas>
     </div>
   );
@@ -84,6 +85,12 @@ function getCanvasStyle(hoveredItemsCount: number) {
 }
 
 function Item(props: any) {
+  const mesh = useRef<THREE.Mesh>();
+  const { size, viewport } = useThree();
+  const aspect = size.width / viewport.width;
+
+  const [position, setPosition] = useState([0, 0, 0]);
+
   const select = (event: any) => {
     event.stopPropagation(); // Select only the item closest to the camera
 
@@ -96,11 +103,22 @@ function Item(props: any) {
 
   var geometry = toThreeGeometry(props.item.mesh);
 
+  const bind = useDrag(({ down, movement: [mx, my] }) => {
+    if(down){
+      const [, , z] = position;
+      setPosition([mx / aspect, -my / aspect, z]);
+    }
+  },
+  { pointerEvents: true })
+
   return (
     <group>
       {/* Main mesh */}
       <mesh
+        ref={mesh}
         {...props}
+        {...bind()}
+        position={position}
         matrix={toThreeMatrix(props.item.transform)}
         geometry={geometry}
         receiveShadow
