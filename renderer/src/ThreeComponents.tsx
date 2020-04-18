@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import React, { useCallback, useRef, useState, useEffect } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import { Canvas, useThree } from "react-three-fiber";
 import { OrbitControls } from "./OrbitControls";
 import * as API from "./../../main/src/api";
@@ -9,9 +9,9 @@ function Item(props: any) {
   const mesh = useRef();
 
   const item = props.item as API.Item;
-  const selectItem = props.selectItemCallback;
-
   const transform = item.transform;
+  const clippingPlane = props.clippingPlane;
+  const selectItem = props.selectItemCallback;
 
   const matrix = new THREE.Matrix4();
   matrix.set(
@@ -56,23 +56,38 @@ function Item(props: any) {
   }
 
   return (
-    <mesh
-      {...props}
-      matrix={matrix}
-      ref={mesh}
-      geometry={geometry}
-      receiveShadow
-      onClick={select}
-    >
-      <meshPhongMaterial
-        attach="material"
-        flatShading={true}
-        color={item.selected ? 0x786fb3 : 0xc0c0c0}
-      />
-      {item.subItems.map((subItem: API.Item) => (
-        <Item key={subItem.uuid} item={subItem} />
-      ))}
-    </mesh>
+    <group>
+      <mesh
+        {...props}
+        matrix={matrix}
+        ref={mesh}
+        geometry={geometry}
+        receiveShadow
+        onClick={select}
+        renderOrder={1}
+      >
+        <meshPhongMaterial
+          attach="material"
+          flatShading={true}
+          clippingPlanes={[clippingPlane]}
+          color={item.selected ? 0x786fb3 : 0xc0c0c0}
+        />
+        {item.subItems.map((subItem: API.Item) => (
+          <Item
+            key={subItem.uuid}
+            item={subItem}
+            clippingPlane={clippingPlane}
+          />
+        ))}
+      </mesh>
+      <mesh geometry={geometry} renderOrder={2}>
+        <meshBasicMaterial
+          attach="material"
+          side={THREE.BackSide}
+          clippingPlanes={[clippingPlane]}
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -94,6 +109,7 @@ const CameraController = () => {
 
 export default function ThreeCanvas(props: any) {
   const mouse = useRef([0, 0]);
+
   const onMouseMove = useCallback(
     ({ clientX: x, clientY: y }) =>
       (mouse.current = [x - window.innerWidth / 2, y - window.innerHeight / 2]),
@@ -104,13 +120,18 @@ export default function ThreeCanvas(props: any) {
     props.selectItemCallback();
   };
 
+  var clippingPlane = new THREE.Plane(
+    new THREE.Vector3(0, 0, -1),
+    props.clippingHeight
+  );
+
   return (
     <div style={{ width: "100%", height: "100%" }} onMouseMove={onMouseMove}>
       <Canvas
         gl={{ alpha: false, antialias: true, logarithmicDepthBuffer: true }}
         orthographic
         camera={{
-          position: [1000, -1000, 1500],
+          position: [1200, -1000, 1500],
           far: 3000,
           zoom: 2,
           up: [0, 0, 1],
@@ -119,6 +140,7 @@ export default function ThreeCanvas(props: any) {
           gl.setClearColor("grey");
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.outputEncoding = THREE.sRGBEncoding;
+          gl.localClippingEnabled = true;
         }}
         onPointerMissed={unSelectAll}
       >
@@ -133,11 +155,14 @@ export default function ThreeCanvas(props: any) {
           intensity={0.3}
         />
 
+        <planeHelper plane={clippingPlane} size={100} />
+
         {props.items.map((item: API.Item) => (
           <Item
             key={item.uuid}
             item={item}
             selectItemCallback={props.selectItemCallback}
+            clippingPlane={clippingPlane}
           />
         ))}
       </Canvas>

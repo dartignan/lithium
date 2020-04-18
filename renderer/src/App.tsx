@@ -253,7 +253,7 @@ function App() {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <ThreeCanvas items={items} selectItemCallback={selectItem} />
+          <ThreeCanvas items={items} selectItemCallback={selectItem} clippingHeight={value} />
         </main>
         <Drawer
           className={classes.rightDrawer}
