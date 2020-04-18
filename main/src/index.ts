@@ -10,22 +10,23 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1200,
     height: 800,
+    minWidth: 400,
+    minHeight: 300,
     frame: false,
     transparent: false,
     webPreferences: {
-      // <--- (1) Additional preferences
       nodeIntegration: true,
-      preload: __dirname + "/preload.js", // <--- (2) Preload script
+      preload: __dirname + "/preload.js",
     },
   });
 
-  win.loadURL("http://localhost:3000"); // <--- (3) Loading react
+  win.on("maximize", () => win.webContents.send("window:maximized"));
+  win.on("unmaximize", () => win.webContents.send("window:unmaximized"));
+
+  // Load React App
+  win.loadURL("http://localhost:3000");
 
   // win.webContents.openDevTools();
-
-  // win.on("closed", () => {
-  //   win = null;
-  // });
 }
 
 app.on("ready", createWindow);
@@ -48,6 +49,10 @@ ipcMain.on("window:minimize", function (e) {
 
 ipcMain.on("window:maximize", function (e) {
   win.maximize();
+});
+
+ipcMain.on("window:unmaximize", function (e) {
+  win.unmaximize();
 });
 
 ipcMain.on("window:close", function (e) {

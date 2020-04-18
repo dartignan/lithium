@@ -12,6 +12,7 @@ import IconButton from "@material-ui/core/IconButton";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import MinimizeIcon from "@material-ui/icons/Minimize";
 import FullscreenIcon from "@material-ui/icons/Fullscreen";
+import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 import CloseIcon from "@material-ui/icons/Close";
 
 import Drawer from "@material-ui/core/Drawer";
@@ -62,6 +63,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     title: {
       flexGrow: 1,
+      textAlign: "center",
     },
     leftDrawer: {
       width: leftDrawerWidth,
@@ -79,7 +81,7 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center",
     },
     slider: {
-      margin: "15px",
+      margin: "22px",
       color: "#8d85bf",
     },
     sliderTrack: {
@@ -94,6 +96,7 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "100%",
       height: "100%",
       display: "flex",
+      overflowX:"hidden"
     },
 
     // Necessary for content to be below AppBar
@@ -129,11 +132,12 @@ const CustomSlider = withStyles({
 
 function App() {
   const classes = useStyles();
-  const [value, setValue] = React.useState<number>(30);
+  const [windowMaximized, setWindowMaximized] = React.useState<boolean>(false);
+  const [clippingHeight, setClippingHeight] = React.useState<number>(30);
   const [items, setItems] = React.useState<API.Item[]>([]);
 
-  const handleChange = (event: any, newValue: number | number[]) => {
-    setValue(newValue as number);
+  const handleChange = (event: any, sliderValue: number | number[]) => {
+    setClippingHeight(sliderValue as number);
   };
 
   const handleKeyDown = (event: any) => {
@@ -178,6 +182,16 @@ function App() {
   };
 
   useEffect(() => {
+    //Window maximized
+    ipcRenderer.on("window:maximized", function (e: any) {
+      setWindowMaximized(true);
+    });
+
+    //Window unmaximized
+    ipcRenderer.on("window:unmaximized", function (e: any) {
+      setWindowMaximized(false);
+    });
+
     //File selected
     ipcRenderer.on("item:add", function (e: any, item: API.Item) {
       item.selected = true;
@@ -210,13 +224,24 @@ function App() {
             >
               <MinimizeIcon />
             </IconButton>
-            <IconButton
-              onClick={maximizeWindow}
-              aria-label="full screen"
-              color="inherit"
-            >
-              <FullscreenIcon />
-            </IconButton>
+            {!windowMaximized && (
+              <IconButton
+                onClick={maximizeWindow}
+                aria-label="full screen"
+                color="inherit"
+              >
+                <FullscreenIcon />
+              </IconButton>
+            )}
+            {windowMaximized && (
+              <IconButton
+                onClick={unMaximizeWindow}
+                aria-label="exit full screen"
+                color="inherit"
+              >
+                <FullscreenExitIcon />
+              </IconButton>
+            )}
             <IconButton
               onClick={closeWindow}
               aria-label="close"
@@ -253,7 +278,11 @@ function App() {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <ThreeCanvas items={items} selectItemCallback={selectItem} clippingHeight={value} />
+          <ThreeCanvas
+            items={items}
+            selectItemCallback={selectItem}
+            clippingHeight={clippingHeight}
+          />
         </main>
         <Drawer
           className={classes.rightDrawer}
@@ -267,7 +296,7 @@ function App() {
           <Slider
             className={classes.slider}
             orientation="vertical"
-            value={value}
+            value={clippingHeight}
             onChange={handleChange}
             aria-labelledby="continuous-slider"
           />
@@ -283,6 +312,10 @@ function minimizeWindow() {
 
 function maximizeWindow() {
   ipcRenderer.send("window:maximize");
+}
+
+function unMaximizeWindow() {
+  ipcRenderer.send("window:unmaximize");
 }
 
 function closeWindow() {

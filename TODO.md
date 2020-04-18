@@ -1,9 +1,9 @@
-- Move
-- Maximize/Restore
+- Drag items => https://maxrohde.com/2019/10/19/creating-a-draggable-shape-with-react-three-fiber/
 - Rectangle item selection
 - Icon
 - Setup
-- Light/Material
+- Enhance Light/Material
 - API location
+- GPU Picking => https://threejs.org/examples/webgl_interactive_cubes_gpu.html
 - ipcRenderer security => https://github.com/electron/electron/issues/9920
 - Immutable pattern, (... operator)
