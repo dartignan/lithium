@@ -10,7 +10,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1200,
     height: 800,
-    // frame: false,
+    frame: false,
     transparent: false,
     webPreferences: {
       // <--- (1) Additional preferences

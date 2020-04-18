@@ -1,7 +1,6 @@
 - Move
-- Move header
 - Maximize/Restore
-- Window select
+- Rectangle item selection
 - Icon
 - Setup
 - Light/Material

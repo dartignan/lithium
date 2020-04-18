@@ -13,6 +13,16 @@
   }
 }
 
+/* Drag window with AppBar */
+.MuiAppBar-root {
+  -webkit-app-region: drag;
+}
+
+/* Buttons are not draggable */
+.MuiButtonBase-root{
+  -webkit-app-region: no-drag;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
