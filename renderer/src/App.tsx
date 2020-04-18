@@ -239,7 +239,7 @@ function App() {
             {items.map((item) => (
               <MenuItem
                 button
-                key={item.name}
+                key={item.uuid}
                 selected={item.selected}
                 onClick={(e) => clickListItem(item, e)}
               >

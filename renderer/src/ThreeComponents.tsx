@@ -4,109 +4,6 @@ import { Canvas, useThree } from "react-three-fiber";
 import { OrbitControls } from "./OrbitControls";
 import * as API from "./../../main/src/api";
 
-function Item(props: any) {
-  // This reference will give us direct access to the mesh
-  const mesh = useRef();
-
-  const item = props.item as API.Item;
-  const transform = item.transform;
-  const clippingPlane = props.clippingPlane;
-  const selectItem = props.selectItemCallback;
-
-  const matrix = new THREE.Matrix4();
-  matrix.set(
-    transform[0],
-    transform[3],
-    transform[6],
-    transform[9],
-    transform[1],
-    transform[4],
-    transform[7],
-    transform[10],
-    transform[2],
-    transform[5],
-    transform[8],
-    transform[11],
-    0,
-    0,
-    0,
-    1
-  );
-
-  const select = (event: any) => {
-    event.stopPropagation(); // Select only the item closest to the camera
-
-    if (event.ctrlKey || event.shiftKey) {
-      selectItem(item, true);
-    } else {
-      selectItem(item);
-    }
-  };
-
-  var geometry = new THREE.BufferGeometry();
-  geometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(item.mesh.vertexArray, 3)
-  );
-
-  if (item.mesh.triangleArray.length > 0) {
-    geometry.setIndex(
-      new THREE.Uint32BufferAttribute(item.mesh.triangleArray, 1)
-    );
-  }
-
-  return (
-    <group>
-      <mesh
-        {...props}
-        matrix={matrix}
-        ref={mesh}
-        geometry={geometry}
-        receiveShadow
-        onClick={select}
-        renderOrder={1}
-      >
-        <meshPhongMaterial
-          attach="material"
-          flatShading={true}
-          clippingPlanes={[clippingPlane]}
-          color={item.selected ? 0x786fb3 : 0xc0c0c0}
-        />
-        {item.subItems.map((subItem: API.Item) => (
-          <Item
-            key={subItem.uuid}
-            item={subItem}
-            clippingPlane={clippingPlane}
-          />
-        ))}
-      </mesh>
-      <mesh geometry={geometry} renderOrder={2}>
-        <meshBasicMaterial
-          attach="material"
-          side={THREE.BackSide}
-          clippingPlanes={[clippingPlane]}
-        />
-      </mesh>
-    </group>
-  );
-}
-
-const CameraController = () => {
-  const { camera, gl } = useThree();
-  useEffect(() => {
-    const orbitControls = new OrbitControls(camera, gl.domElement);
-
-    orbitControls.minZoom = 1;
-    orbitControls.maxZoom = 200;
-    orbitControls.zoomSpeed = 2.0;
-    orbitControls.target.set(0, 0, 0);
-    return () => {
-      orbitControls.dispose();
-    };
-  }, [camera, gl]);
-  return null;
-};
-
 export default function ThreeCanvas(props: any) {
   const mouse = useRef([0, 0]);
 
@@ -168,4 +65,109 @@ export default function ThreeCanvas(props: any) {
       </Canvas>
     </div>
   );
+}
+
+function Item(props: any) {
+  const item = props.item;
+  const clippingPlane = props.clippingPlane;
+  const selectItem = props.selectItemCallback;
+
+  const select = (event: any) => {
+    event.stopPropagation(); // Select only the item closest to the camera
+
+    if (event.ctrlKey || event.shiftKey) {
+      selectItem(item, true);
+    } else {
+      selectItem(item);
+    }
+  };
+
+  var geometry = toThreeGeometry(item.mesh);
+
+  return (
+    <group>
+      {/* Main mesh */}
+      <mesh
+        {...props}
+        matrix={toThreeMatrix(item.transform)}
+        geometry={geometry}
+        receiveShadow
+        onClick={select}
+        renderOrder={1}
+      >
+        <meshPhongMaterial
+          attach="material"
+          flatShading={true}
+          clippingPlanes={[clippingPlane]}
+          color={item.selected ? 0x786fb3 : 0xc0c0c0}
+        />
+      </mesh>
+
+      {/* Clipping layer mesh */}
+      <mesh geometry={geometry} renderOrder={2}>
+        <meshBasicMaterial
+          attach="material"
+          side={THREE.BackSide}
+          clippingPlanes={[clippingPlane]}
+        />
+      </mesh>
+
+      {/* Sub items */}
+      {item.subItems.map((subItem: API.Item) => (
+        <Item key={subItem.uuid} item={subItem} clippingPlane={clippingPlane} />
+      ))}
+    </group>
+  );
+}
+
+function CameraController() {
+  const { camera, gl } = useThree();
+  useEffect(() => {
+    const orbitControls = new OrbitControls(camera, gl.domElement);
+
+    orbitControls.minZoom = 1;
+    orbitControls.maxZoom = 200;
+    orbitControls.zoomSpeed = 2.0;
+    orbitControls.target.set(0, 0, 0);
+    return () => {
+      orbitControls.dispose();
+    };
+  }, [camera, gl]);
+  return null;
+}
+
+function toThreeMatrix(transform: Float32Array) {
+  return new THREE.Matrix4().set(
+    transform[0],
+    transform[3],
+    transform[6],
+    transform[9],
+    transform[1],
+    transform[4],
+    transform[7],
+    transform[10],
+    transform[2],
+    transform[5],
+    transform[8],
+    transform[11],
+    0,
+    0,
+    0,
+    1
+  );
+}
+
+function toThreeGeometry(mesh: API.Mesh) {
+  var geometry = new THREE.BufferGeometry();
+
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(mesh.vertexArray, 3)
+  );
+
+  if (mesh.triangleArray.length > 0) {
+    geometry.setIndex(new THREE.Uint32BufferAttribute(mesh.triangleArray, 1));
+  }
+
+  return geometry;
 }
