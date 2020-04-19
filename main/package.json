@@ -9,18 +9,18 @@
     "@types/jszip": "^3.1.7",
     "@types/node": "12",
     "@types/uuid": "^7.0.2",
-    "electron": "^8.2.0"
+    "electron": "^8.2.0",
+    "nodemon": "^2.0.3",
+    "typescript": "^3.8.3"
   },
   "scripts": {
-    "electron": "electron --inspect=5858 --remote-debugging-port=9223 dist",
-    "start": "set NODE_ENV=dev && nodemon --watch ./src --exec \"tsc && yarn electron\""
+    "build": "tsc",
+    "electron": "electron --inspect=5858 --remote-debugging-port=9223 build",
+    "start": "set NODE_ENV=dev && nodemon --watch ./src --exec \"yarn build && yarn electron\""
   },
   "dependencies": {
     "jsdom": "^16.2.2",
     "jszip": "^3.3.0",
-    "nodemon": "^2.0.2",
-    "three": "^0.115.0",
-    "typescript": "^3.8.3",
     "uuid": "^7.0.3"
   }
 }

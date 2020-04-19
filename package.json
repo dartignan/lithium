@@ -4,12 +4,13 @@
   "main": "index.js",
   "author": "Damien ARTIGNAN",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "concurrently": "^5.1.0",
-    "husky": "^4.2.3",
-    "lint-staged": "^10.1.1",
-    "prettier": "^2.0.2",
-    "wait-on": "^4.0.1"
+    "copyfiles": "^2.2.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.1.5",
+    "prettier": "^2.0.4",
+    "wait-on": "^4.0.2"
   },
   "husky": {
     "hooks": {
@@ -22,6 +23,8 @@
     ]
   },
   "scripts": {
+    "build": "yarn --cwd renderer build && yarn --cwd main build",
+    "postbuild": "copyfiles -u 2 \"./renderer/build/**/*.*\" \"build/renderer\" && copyfiles -u 2 \"./main/build/**/*.*\" \"build/main\"",
     "format": "prettier --write **/*.{js,jsx,ts,tsx,json,css,scss,md}",
     "start": "concurrently \"yarn --cwd renderer start\" \"wait-on http://localhost:3000 && yarn --cwd main start\""
   }
