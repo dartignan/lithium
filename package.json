@@ -77,8 +77,9 @@
     "electron-start": "set NODE_ENV=dev && nodemon --watch src/electron --ext ts,js,json --exec \"yarn electron-build && yarn electron-debug\"",
     "electron-build": "tsc -p src/electron",
     "electron-debug": "electron --inspect=5858 --remote-debugging-port=9223 .",
+    "build": "yarn react-build && yarn electron-build",
     "start": "concurrently \"yarn react-start\" \"wait-on http://localhost:3000 && yarn electron-start\"",
-    "prepackage": "yarn react-build && yarn electron-build",
+    "prepackage": "yarn build",
     "package": "electron-builder",
     "format": "prettier --write **/*.{ts,tsx,js,jsx,json,css,scss,md}"
   },
