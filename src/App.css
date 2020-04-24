@@ -4,6 +4,6 @@
 }
 
 /* Buttons are not draggable */
-.MuiButtonBase-root{
+.MuiButtonBase-root {
   -webkit-app-region: no-drag;
 }

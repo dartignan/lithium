@@ -27,7 +27,7 @@ import Slider from "@material-ui/core/Slider";
 
 import ThreeCanvas from "./ThreeComponents";
 
-import * as API from "./../../main/src/api";
+import * as API from "electron/api";
 
 import {
   Theme,
@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "100%",
       height: "100%",
       display: "flex",
-      overflowX:"hidden"
+      overflowX: "hidden",
     },
 
     // Necessary for content to be below AppBar

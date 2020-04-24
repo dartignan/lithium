@@ -143,51 +143,50 @@ function parseMetadataNodes(metadataNodes: NodeListOf<SVGMetadataElement>) {
 }
 
 function parseMeshNode(meshNode: Element | null) {
-  if(meshNode)
-  {
+  if (meshNode) {
     var meshData = new MeshData();
 
     var vertices = [];
     var vertexNodes = meshNode.querySelectorAll("vertices vertex");
-  
+
     for (var i = 0; i < vertexNodes.length; i++) {
       var vertexNode = vertexNodes[i];
       var x = vertexNode.getAttribute("x");
       var y = vertexNode.getAttribute("y");
       var z = vertexNode.getAttribute("z");
-  
+
       if (x && y && z) {
         vertices.push(parseFloat(x), parseFloat(y), parseFloat(z));
       }
     }
-  
+
     var triangles = [];
     var triangleNodes = meshNode.querySelectorAll("triangles triangle");
-  
+
     for (var i = 0; i < triangleNodes.length; i++) {
       var triangleNode = triangleNodes[i];
       var v1 = triangleNode.getAttribute("v1");
       var v2 = triangleNode.getAttribute("v2");
       var v3 = triangleNode.getAttribute("v3");
-  
+
       if (v1 && v2 && v3) {
         triangles.push(parseInt(v1), parseInt(v2), parseInt(v3));
       }
     }
-  
+
     meshData.vertexArray = new Float32Array(vertices);
     meshData.triangleArray = new Uint32Array(triangles);
-  
+
     return meshData;
   }
- 
+
   return undefined;
 }
 
 function parseComponentsNode(componentsNode: Element | null) {
   var components: ComponentData[] = [];
 
-  if(componentsNode){
+  if (componentsNode) {
     var componentNodes = componentsNode.querySelectorAll("component");
 
     componentNodes.forEach((componentNode) => {
@@ -244,7 +243,7 @@ function parseObjectNode(objectNode: HTMLObjectElement) {
 function parseResourcesNode(resourcesNode: Element | null) {
   var resourcesData = new ModelResources();
 
-  if(resourcesNode){
+  if (resourcesNode) {
     var objectNodes = resourcesNode.querySelectorAll("object");
 
     objectNodes.forEach((objectNode) => {
@@ -259,7 +258,7 @@ function parseResourcesNode(resourcesNode: Element | null) {
 function parseBuildNode(buildNode: Element | null) {
   var buildData: BuildItem[] = [];
 
-  if(buildNode) {
+  if (buildNode) {
     var itemNodes = buildNode.querySelectorAll("item");
 
     itemNodes.forEach((itemNode) => {

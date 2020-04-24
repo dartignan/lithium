@@ -6,7 +6,7 @@
       "request": "launch",
       "type": "node",
       "port": 5858,
-      "cwd": "${workspaceRoot}/main/dist",
+      "cwd": "${workspaceRoot}/build",
       "runtimeExecutable": "yarn",
       "runtimeArgs": ["--cwd", "${workspaceRoot}", "start"],
       "timeout": 30000
@@ -17,7 +17,7 @@
       "type": "chrome",
       "port": 9223,
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/renderer/src",
+      "webRoot": "${workspaceFolder}/src",
       "sourceMapPathOverrides": {
         "webpack:///src/*": "${webRoot}/*"
       },
@@ -28,7 +28,7 @@
       "request": "launch",
       "type": "chrome",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/renderer/src",
+      "webRoot": "${workspaceFolder}/src",
       "sourceMapPathOverrides": {
         "webpack:///src/*": "${webRoot}/*"
       },

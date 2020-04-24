@@ -3,7 +3,7 @@ import React, { useCallback, useRef, useEffect, useState } from "react";
 import { Canvas, useThree } from "react-three-fiber";
 import { OrbitControls } from "./OrbitControls";
 import { useDrag } from "react-use-gesture";
-import * as API from "./../../main/src/api";
+import * as API from "electron/api";
 
 export default function ThreeCanvas(props: any) {
   const mouse = useRef([0, 0]);
@@ -103,13 +103,15 @@ function Item(props: any) {
 
   var geometry = toThreeGeometry(props.item.mesh);
 
-  const bind = useDrag(({ down, movement: [mx, my] }) => {
-    if(down){
-      const [, , z] = position;
-      setPosition([mx / aspect, -my / aspect, z]);
-    }
-  },
-  { pointerEvents: true })
+  const bind = useDrag(
+    ({ down, movement: [mx, my] }) => {
+      if (down) {
+        const [, , z] = position;
+        setPosition([mx / aspect, -my / aspect, z]);
+      }
+    },
+    { pointerEvents: true }
+  );
 
   return (
     <group>

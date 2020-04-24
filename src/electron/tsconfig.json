@@ -2,12 +2,12 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "outDir": "build",
+    "outDir": "./../../build",
+    "skipLibCheck": true,
     "sourceMap": true,
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-  },
-  "include": ["src", "./../../api/src"]
+    "strict": true
+  }
 }

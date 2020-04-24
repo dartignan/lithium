@@ -1,15 +1,46 @@
 {
-  "name": "electron-create-react-app-test",
+  "name": "lithium",
   "version": "0.1.0",
-  "main": "index.js",
-  "author": "Damien ARTIGNAN",
+  "description": "3D model viewer based on electron, react, three & material-ui",
+  "author": "dartignan",
   "license": "MIT",
+  "main": "build/electron.js",
+  "homepage": "./",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^4.9.8",
+    "@material-ui/icons": "^4.9.1",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "@types/jest": "^25.1.4",
+    "@types/jszip": "^3.1.7",
+    "@types/node": "12",
+    "@types/react": "^16.9.31",
+    "@types/react-dom": "^16.9.6",
+    "electron-is-dev": "^1.2.0",
+    "jsdom": "^16.2.2",
+    "jszip": "^3.4.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "3.4.1",
+    "react-three-fiber": "^4.0.25",
+    "react-use-gesture": "^7.0.15",
+    "three": "^0.115.0",
+    "typeface-roboto": "^0.0.75",
+    "uuid": "^7.0.3"
+  },
   "devDependencies": {
+    "@types/jsdom": "^16.2.1",
+    "@types/uuid": "^7.0.3",
     "concurrently": "^5.1.0",
-    "copyfiles": "^2.2.0",
+    "electron": "^8.2.3",
+    "electron-builder": "^22.5.1",
     "husky": "^4.2.5",
-    "lint-staged": "^10.1.5",
-    "prettier": "^2.0.4",
+    "lint-staged": "^10.1.7",
+    "nodemon": "^2.0.3",
+    "prettier": "^2.0.5",
+    "typescript": "^3.8.3",
     "wait-on": "^4.0.2"
   },
   "husky": {
@@ -22,10 +53,48 @@
       "prettier --write"
     ]
   },
+  "build": {
+    "appId": "com.example.lithium",
+    "productName": "Lithium",
+    "copyright": "Copyright © 2020 ${author}",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": "msi",
+      "icon": "icons/icon.ico"
+    }
+  },
   "scripts": {
-    "build": "yarn --cwd renderer build && yarn --cwd main build",
-    "postbuild": "copyfiles -u 2 \"./renderer/build/**/*.*\" \"build/renderer\" && copyfiles -u 2 \"./main/build/**/*.*\" \"build/main\"",
-    "format": "prettier --write **/*.{js,jsx,ts,tsx,json,css,scss,md}",
-    "start": "concurrently \"yarn --cwd renderer start\" \"wait-on http://localhost:3000 && yarn --cwd main start\""
+    "react-start": "react-scripts start",
+    "react-build": "react-scripts build",
+    "react-test": "react-scripts test",
+    "react-eject": "react-scripts eject",
+    "electron-start": "set NODE_ENV=dev && nodemon --watch src/electron --ext ts,js,json --exec \"yarn electron-build && yarn electron-debug\"",
+    "electron-build": "tsc -p src/electron",
+    "electron-debug": "electron --inspect=5858 --remote-debugging-port=9223 .",
+    "start": "concurrently \"yarn react-start\" \"wait-on http://localhost:3000 && yarn electron-start\"",
+    "prepackage": "yarn react-build && yarn electron-build",
+    "package": "electron-builder",
+    "format": "prettier --write **/*.{ts,tsx,js,jsx,json,css,scss,md}"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

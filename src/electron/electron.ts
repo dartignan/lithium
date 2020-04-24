@@ -1,5 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import isDev from "electron-is-dev";
 import { v4 as uuid } from "uuid";
+import path from "path";
 import * as ThreeMF from "./3MFLoader";
 import * as STL from "./STLLoader";
 import * as API from "./api";
@@ -8,7 +10,7 @@ let win: BrowserWindow;
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1200,
+    width: 1000,
     height: 800,
     minWidth: 400,
     minHeight: 300,
@@ -24,7 +26,11 @@ function createWindow() {
   win.on("unmaximize", () => win.webContents.send("window:unmaximized"));
 
   // Load React App
-  win.loadURL("http://localhost:3000");
+  win.loadURL(
+    isDev
+      ? "http://localhost:3000"
+      : `file://${path.join(__dirname, "../build/index.html")}`
+  );
 
   // win.webContents.openDevTools();
 }
