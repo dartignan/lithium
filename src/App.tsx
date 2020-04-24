@@ -133,8 +133,9 @@ const CustomSlider = withStyles({
 function App() {
   const classes = useStyles();
   const [windowMaximized, setWindowMaximized] = React.useState<boolean>(false);
-  const [clippingHeight, setClippingHeight] = React.useState<number>(30);
+  const [clippingHeight, setClippingHeight] = React.useState<number>(0);
   const [items, setItems] = React.useState<API.Item[]>([]);
+  const [maxHeight, setMaxHeight] = React.useState<number>(0);
 
   const handleChange = (event: any, sliderValue: number | number[]) => {
     setClippingHeight(sliderValue as number);
@@ -163,6 +164,8 @@ function App() {
       }
     });
 
+    setMaxHeight(0);
+    setClippingHeight(0);
     setItems([...newItems]);
   };
 
@@ -181,18 +184,22 @@ function App() {
     setItems((items) => [...items]);
   };
 
+  const updateHeight = (height: number) => {
+    if (height > maxHeight) {
+      setMaxHeight(height);
+      setClippingHeight(height);
+    }
+  };
+
   useEffect(() => {
-    //Window maximized
-    ipcRenderer.on("window:maximized", function (e: any) {
+    ipcRenderer.on("window:maximize", function (e: any) {
       setWindowMaximized(true);
     });
 
-    //Window unmaximized
-    ipcRenderer.on("window:unmaximized", function (e: any) {
+    ipcRenderer.on("window:unmaximize", function (e: any) {
       setWindowMaximized(false);
     });
 
-    //File selected
     ipcRenderer.on("item:add", function (e: any, item: API.Item) {
       item.selected = true;
       setItems((items) => [...items, item]);
@@ -280,7 +287,8 @@ function App() {
           <div className={classes.toolbar} />
           <ThreeCanvas
             items={items}
-            selectItemCallback={selectItem}
+            heightUpdated={updateHeight}
+            itemSelected={selectItem}
             clippingHeight={clippingHeight}
           />
         </main>
@@ -297,6 +305,7 @@ function App() {
             className={classes.slider}
             orientation="vertical"
             value={clippingHeight}
+            max={maxHeight}
             onChange={handleChange}
             aria-labelledby="continuous-slider"
           />

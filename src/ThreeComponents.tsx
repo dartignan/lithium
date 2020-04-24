@@ -16,7 +16,7 @@ export default function ThreeCanvas(props: any) {
   );
 
   const unSelectAll = () => {
-    props.selectItemCallback();
+    props.itemSelected();
   };
 
   var clippingPlane = new THREE.Plane(
@@ -67,7 +67,8 @@ export default function ThreeCanvas(props: any) {
           <Item
             key={item.uuid}
             item={item}
-            selectItemCallback={props.selectItemCallback}
+            heightUpdated={props.heightUpdated}
+            itemSelected={props.itemSelected}
             overItemCallback={overItemCallback}
             outItemCallback={outItemCallback}
             clippingPlane={clippingPlane}
@@ -95,9 +96,9 @@ function Item(props: any) {
     event.stopPropagation(); // Select only the item closest to the camera
 
     if (event.ctrlKey || event.shiftKey) {
-      props.selectItemCallback(props.item, true);
+      props.itemSelected(props.item, true);
     } else {
-      props.selectItemCallback(props.item);
+      props.itemSelected(props.item);
     }
   };
 
@@ -137,6 +138,10 @@ function Item(props: any) {
         />
       </mesh>
 
+      {mesh.current?.geometry.computeBoundingBox()}
+
+      {props.heightUpdated(mesh.current?.geometry.boundingBox?.max.z)}
+
       {/* Clipping layer mesh */}
       <mesh geometry={geometry} renderOrder={2}>
         <meshBasicMaterial
@@ -152,7 +157,7 @@ function Item(props: any) {
           key={subItem.uuid}
           item={subItem}
           clippingPlane={props.clippingPlane}
-          selectItemCallback={props.selectItemCallback}
+          itemSelected={props.itemSelected}
           overItemCallback={props.overItemCallback}
           outItemCallback={props.outItemCallback}
         />

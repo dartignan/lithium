@@ -10,7 +10,7 @@ let win: BrowserWindow;
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1000,
+    width: 1200,
     height: 800,
     minWidth: 400,
     minHeight: 300,
@@ -22,8 +22,8 @@ function createWindow() {
     },
   });
 
-  win.on("maximize", () => win.webContents.send("window:maximized"));
-  win.on("unmaximize", () => win.webContents.send("window:unmaximized"));
+  win.on("maximize", () => win.webContents.send("window:maximize"));
+  win.on("unmaximize", () => win.webContents.send("window:unmaximize"));
 
   // Load React App
   win.loadURL(
