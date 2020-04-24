@@ -29,14 +29,10 @@ import ThreeCanvas from "./ThreeComponents";
 
 import * as API from "electron/api";
 
-import {
-  Theme,
-  createStyles,
-  makeStyles,
-  withStyles,
-} from "@material-ui/core/styles";
+import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
 
-const { ipcRenderer } = window.eval("require('electron')");
+// eslint-disable-next-line no-eval
+const { ipcRenderer } = eval("require('electron')");
 
 const leftDrawerWidth = 250;
 const rightDrawerWidth = 50;
