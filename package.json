@@ -84,7 +84,8 @@
     "format": "prettier --write **/*.{ts,tsx,js,jsx,json,css,scss,md}"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "no-eval": ["error", {"allowIndirect": true}]
   },
   "browserslist": {
     "production": [

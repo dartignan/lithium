@@ -36,7 +36,7 @@ import {
   withStyles,
 } from "@material-ui/core/styles";
 
-const { ipcRenderer } = eval("require('electron')");
+const { ipcRenderer } = window.eval("require('electron')");
 
 const leftDrawerWidth = 250;
 const rightDrawerWidth = 50;
@@ -103,32 +103,6 @@ const useStyles = makeStyles((theme: Theme) =>
     toolbar: theme.mixins.toolbar,
   })
 );
-
-// Attempt to customize slider
-const CustomSlider = withStyles({
-  root: {
-    color: "#8d85bf",
-    margin: 10,
-  },
-  thumb: {
-    height: 16,
-    width: 16,
-  },
-  track: {
-    height: 8,
-    borderRadius: 4,
-    $vertical: {
-      width: 8,
-    },
-  },
-  rail: {
-    height: 8,
-    borderRadius: 4,
-    "$vertical $rail": {
-      width: 8,
-    },
-  },
-})(Slider);
 
 function App() {
   const classes = useStyles();
