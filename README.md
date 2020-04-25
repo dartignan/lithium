@@ -1,68 +1,62 @@
+Lithium
+=======
+
+Lithium is a 3D model viewer based on [electron](https://github.com/electron/electron), [react](https://github.com/facebook/react), [three.js](https://github.com/mrdoob/three.js), [react-three-fiber](https://github.com/react-spring/react-three-fiber) & [material-ui](https://github.com/mui-org/material-ui).
+
+![Lithium screenshot](/screenshot.png)
+
+The name of this project comes from the 3 main packages this project relies on: `electron`, `three.js` and `material-ui`. The `lithium` metal is a three-electron-material (in its neutral form).
+
+## Features
+
+### Supported formats
+
+Lithium currently supports the following file formats:
+- [3MF](https://github.com/3MFConsortium/spec_core)
+- [STL](https://en.wikipedia.org/wiki/STL_(file_format))
+
+### 3D View
+
+The 3D view supports camera gestures, as well as item selection.
+
+### Clipping
+
+The slider on the right enables to clip the parts with an horizontal plane.
+
+## Development
+
+To clone and run this repository you'll need [Git](https://git-scm.com/), [Node.js](https://nodejs.org) and [yarn](https://yarnpkg.com/) installed on your computer. From your command line:
+
+```bash
+# Clone this repository
+git clone https://github.com/dartignan/lithium
+# Go into the repository
+cd lithium
+# Install dependencies
+yarn install
+# Run the app
+yarn start
+```
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+### Debugging
 
-In the project directory, you can run:
+This project contains the following debug configurations for [VSCode](https://code.visualstudio.com/):
 
-### `yarn start`
+Configuration | Description
+- | -
+Electron: Main | Runs the app and attachs to the main (node) process.
+Electron: Renderer | Attachs to the renderer (chrome) process.
+Electron: All | Runs the app and attachs to both main and renderer processes.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Packaging & CI
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+[Electron Builder](https://github.com/electron-userland/electron-builder) is used to generate installation packages for Windows, MacOS and Linux.
 
-### `yarn test`
+GitHub Actions are set up using [Action Electron Builder](https://github.com/samuelmeuli/action-electron-builder).
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Acknowledgements
 
-### `yarn build`
+Thanks to all the contributors of the packages I use in this project, and the help provided on [GitHub](https://github.com), [Medium](https://medium.com) and [StackOverflow](https://stackoverflow.com).
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify

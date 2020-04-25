@@ -22,17 +22,6 @@
         "webpack:///src/*": "${webRoot}/*"
       },
       "timeout": 30000
-    },
-    {
-      "name": "Chrome",
-      "request": "launch",
-      "type": "chrome",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/src",
-      "sourceMapPathOverrides": {
-        "webpack:///src/*": "${webRoot}/*"
-      },
-      "timeout": 30000
     }
   ],
   "compounds": [
