@@ -60,6 +60,7 @@ const useStyles = makeStyles((theme: Theme) =>
     title: {
       flexGrow: 1,
       textAlign: "center",
+      userSelect: "none",
     },
     leftDrawer: {
       width: leftDrawerWidth,
@@ -114,6 +115,8 @@ function App() {
   const handleKeyDown = (event: any) => {
     if (event.key === "Delete") {
       deleteSelectedItems();
+    } else if (event.ctrlKey && event.key === "a") {
+      selectAllItems();
     }
   };
 
@@ -142,22 +145,47 @@ function App() {
   const selectItem = (item?: API.Item, toggleSelection?: boolean) => {
     if (item) {
       if (toggleSelection) {
-        item.selected = !item.selected;
+        selectRootItem(item, !item.selected);
       } else {
-        items.forEach((item) => (item.selected = false));
-        item.selected = true;
+        items.forEach((item) => selectRootItem(item, false));
+        selectRootItem(item, true);
       }
     } else {
-      items.forEach((item) => (item.selected = false));
+      items.forEach((item) => selectRootItem(item, false));
     }
 
     setItems((items) => [...items]);
   };
 
+  const selectAllItems = () => {
+    items.forEach((item) => selectRootItem(item, true));
+    setItems((items) => [...items]);
+  };
+
+  const selectRootItem = (item: API.Item, value: boolean) => {
+    var parentItem = items.find((parentItem) =>
+      parentItem.subItems.find((subItem) => subItem.uuid === item.uuid)
+    );
+
+    if (parentItem) {
+      selectRootItem(parentItem, value);
+    } else {
+      item.selected = value;
+      selectSubItems(item, value);
+    }
+  };
+
+  const selectSubItems = (item: API.Item, value: boolean) => {
+    item.subItems.forEach((subItem) => {
+      subItem.selected = value;
+      selectSubItems(subItem, value);
+    });
+  };
+
   const updateHeight = (height: number) => {
     if (height > maxHeight) {
-      setMaxHeight(height);
-      setClippingHeight(height);
+      setMaxHeight(height + 0.001);
+      setClippingHeight(height + 0.001);
     }
   };
 

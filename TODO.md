@@ -1,6 +1,7 @@
+- Readme.md
+- Enhance Light/Material
 - Drag items => https://maxrohde.com/2019/10/19/creating-a-draggable-shape-with-react-three-fiber/
 - Rectangle item selection
-- Enhance Light/Material
 - GPU Picking => https://threejs.org/examples/webgl_interactive_cubes_gpu.html
 - ipcRenderer security => https://github.com/electron/electron/issues/9920
 - Immutable pattern, (... operator)

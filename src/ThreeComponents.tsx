@@ -86,7 +86,6 @@ function getCanvasStyle(hoveredItemsCount: number) {
 }
 
 function Item(props: any) {
-  const mesh = useRef<THREE.Mesh>();
   const { size, viewport } = useThree();
   const aspect = size.width / viewport.width;
 
@@ -102,8 +101,6 @@ function Item(props: any) {
     }
   };
 
-  var geometry = toThreeGeometry(props.item.mesh);
-
   const bind = useDrag(
     ({ down, movement: [mx, my] }) => {
       if (down) {
@@ -114,15 +111,20 @@ function Item(props: any) {
     { pointerEvents: true }
   );
 
+  var geometry = toThreeGeometry(props.item.mesh);
+  geometry.computeBoundingBox();
+  props.heightUpdated(geometry.boundingBox?.max.z);
+
   return (
-    <group>
+    <group
+      matrixAutoUpdate={false}
+      matrix={toThreeMatrix(props.item.transform)}
+    >
       {/* Main mesh */}
       <mesh
-        ref={mesh}
         {...props}
         {...bind()}
         position={position}
-        matrix={toThreeMatrix(props.item.transform)}
         geometry={geometry}
         receiveShadow
         onPointerDown={select}
@@ -137,10 +139,6 @@ function Item(props: any) {
           color={props.item.selected ? 0x786fb3 : 0xc0c0c0}
         />
       </mesh>
-
-      {mesh.current?.geometry.computeBoundingBox()}
-
-      {props.heightUpdated(mesh.current?.geometry.boundingBox?.max.z)}
 
       {/* Clipping layer mesh */}
       <mesh geometry={geometry} renderOrder={2}>
@@ -158,6 +156,7 @@ function Item(props: any) {
           item={subItem}
           clippingPlane={props.clippingPlane}
           itemSelected={props.itemSelected}
+          heightUpdated={props.heightUpdated}
           overItemCallback={props.overItemCallback}
           outItemCallback={props.outItemCallback}
         />
