@@ -1,6 +1,6 @@
 {
   "name": "lithium",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "3D model viewer based on electron, react, three & material-ui",
   "author": "dartignan",
   "license": "MIT",
