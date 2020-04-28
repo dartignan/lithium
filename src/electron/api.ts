@@ -7,18 +7,14 @@ class Item {
     0,
     0,
     0,
+    1,
+    0,
+    0,
     0,
     1,
     0,
     0,
     0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
   ]);
   mesh: Mesh = new Mesh();
   selected: boolean = false;
