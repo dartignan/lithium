@@ -1,3 +1,6 @@
+![Build/release](https://github.com/dartignan/lithium/workflows/Build/release/badge.svg)
+[![lithium](https://snapcraft.io//lithium/badge.svg)](https://snapcraft.io/lithium)
+
 Lithium
 =======
 
@@ -22,6 +25,12 @@ The 3D view supports camera gestures, as well as item selection.
 ### Clipping
 
 The slider on the right enables to clip the parts with an horizontal plane.
+
+## Download
+
+Download the latest release for Windows, Mac & Linux from the [releases](https://github.com/dartignan/lithium/releases) page.
+
+For Linux, the app can also be installed from [Snapcraft](https://snapcraft.io/lithium).
 
 ## Development
 
@@ -58,5 +67,5 @@ GitHub Actions are set up using [Action Electron Builder](https://github.com/sam
 
 # Acknowledgements
 
-Thanks to all the contributors of the packages I use in this project, and the help provided on [GitHub](https://github.com), [Medium](https://medium.com) and [StackOverflow](https://stackoverflow.com).
+Thanks to all the contributors of the packages used in this project, and the help provided on [GitHub](https://github.com), [Medium](https://medium.com) and [StackOverflow](https://stackoverflow.com).
 
