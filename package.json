@@ -54,7 +54,7 @@
     ]
   },
   "build": {
-    "appId": "com.example.lithium",
+    "appId": "com.dartignan.lithium",
     "productName": "Lithium",
     "copyright": "Copyright © 2020 ${author}",
     "files": [
@@ -67,6 +67,9 @@
     "win": {
       "target": "msi",
       "icon": "icons/icon.ico"
+    },
+    "mac": {
+      "target": "dmg"
     }
   },
   "scripts": {

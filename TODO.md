@@ -1,4 +1,3 @@
-- Readme.md
 - Enhance Light/Material
 - Drag items => https://maxrohde.com/2019/10/19/creating-a-draggable-shape-with-react-three-fiber/
 - Rectangle item selection
